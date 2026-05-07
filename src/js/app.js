@@ -1,4 +1,4 @@
-// Fork this repository for free:  https://github.com/reza-azimifar
+// Hello METC
 
 import $ from "jquery";
 import "../scss/styles.scss";
