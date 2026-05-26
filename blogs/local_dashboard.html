@@ -1,0 +1,367 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.db{padding:1rem 0}
+.header{padding:1rem 1.25rem 0.5rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem}
+.header h1{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.header p{font-size:13px;color:var(--color-text-secondary);margin-top:4px}
+.section-title{font-size:14px;font-weight:500;color:var(--color-text-secondary);margin:1.5rem 0 0.75rem;letter-spacing:0.03em;text-transform:uppercase;font-size:11px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.5rem}
+.kpi{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem}
+.kpi-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.chart-card h3{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.75rem}
+.chart-card .note{font-size:11px;color:var(--color-text-secondary);margin-top:6px}
+.chart-full{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:1rem}
+.chart-full h3{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.75rem}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--color-text-secondary)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.tab-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{padding:5px 12px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.policy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem}
+.policy-card{border-radius:var(--border-radius-md);padding:0.875rem;border-left:3px solid}
+.policy-card.warn{background:var(--color-background-warning);border-color:#EF9F27;color:var(--color-text-primary)}
+.policy-card.info{background:var(--color-background-info);border-color:#378ADD;color:var(--color-text-primary)}
+.policy-card.success{background:var(--color-background-success);border-color:#639922;color:var(--color-text-primary)}
+.policy-card.danger{background:var(--color-background-danger);border-color:#E24B4A;color:var(--color-text-primary)}
+.policy-card p{font-size:12px;margin-top:4px;color:var(--color-text-secondary)}
+.policy-card strong{font-size:13px;font-weight:500}
+</style>
+
+<div class="db">
+<div class="header">
+  <h1><i class="ti ti-map-pin" aria-hidden="true"></i> Nepal housing & population census dashboard — NHPC 2021</h1>
+  <p>753 local-level units · 7 provinces · Mountain, Hill &amp; Tarai regions · Source: Central Bureau of Statistics, Nepal</p>
+</div>
+
+<div style="padding:0 1rem">
+
+<div class="section-title">National overview</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Total population</div><div class="kpi-val">28.9M</div><div class="kpi-sub">28,925,480</div></div>
+  <div class="kpi"><div class="kpi-label">Urban population</div><div class="kpi-val">65.5%</div><div class="kpi-sub">18.96M people</div></div>
+  <div class="kpi"><div class="kpi-label">Total households</div><div class="kpi-val">6.66M</div><div class="kpi-sub">Avg size 4.34</div></div>
+  <div class="kpi"><div class="kpi-label">Local units</div><div class="kpi-val">753</div><div class="kpi-sub">Metro, Sub-Metro, Urban, Rural</div></div>
+  <div class="kpi"><div class="kpi-label">Grid electricity</div><div class="kpi-val">91.6%</div><div class="kpi-sub">lighting access</div></div>
+  <div class="kpi"><div class="kpi-label">LPG cooking</div><div class="kpi-val">42.3%</div><div class="kpi-sub">Clean fuel access</div></div>
+  <div class="kpi"><div class="kpi-label">Cement walls</div><div class="kpi-val">51.1%</div><div class="kpi-sub">Durable housing</div></div>
+  <div class="kpi"><div class="kpi-label">Fuelwood cooking</div><div class="kpi-val">52.5%</div><div class="kpi-sub">Pollution risk</div></div>
+</div>
+
+<div class="section-title">Key policy priorities</div>
+<div class="policy-grid">
+  <div class="policy-card warn"><strong><i class="ti ti-flame" aria-hidden="true"></i> Clean cooking gap</strong><p>52.5% still rely on fuelwood. Mountain regions at 86.6% — major indoor air pollution burden.</p></div>
+  <div class="policy-card danger"><strong><i class="ti ti-home" aria-hidden="true"></i> Mud wall housing</strong><p>73.1% of Mountain households use mud-bonded walls. Disaster risk is high in seismic zones.</p></div>
+  <div class="policy-card info"><strong><i class="ti ti-solar-panel" aria-hidden="true"></i> Solar off-grid gap</strong><p>Karnali has only 47.3% grid access — 50.2% depend on solar. Last-mile grid extension needed.</p></div>
+  <div class="policy-card success"><strong><i class="ti ti-bolt" aria-hidden="true"></i> Electricity gains</strong><p>91.6% national grid coverage achieved. Tarai leads at 96.7%, but Mountain lags at 75.1%.</p></div>
+</div>
+
+<div class="section-title">Population &amp; households by ecological region</div>
+<div class="chart-grid">
+<div class="chart-card">
+  <h3>Population distribution by region</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>Mountain (6.1%)</span>
+    <span><span class="legend-dot" style="background:#1D9E75"></span>Hill (40.2%)</span>
+    <span><span class="legend-dot" style="background:#D85A30"></span>Tarai (53.8%)</span>
+  </div>
+  <div style="position:relative;height:200px"><canvas id="c1" role="img" aria-label="Pie chart: Tarai 53.8%, Hill 40.2%, Mountain 6.1%">Tarai 53.8%, Hill 40.2%, Mountain 6.1%</canvas></div>
+  <div class="note">Tarai holds the majority population despite smaller geographic footprint</div>
+</div>
+<div class="chart-card">
+  <h3>Avg household size by region</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#378ADD"></span>Household size</span>
+  </div>
+  <div style="position:relative;height:200px"><canvas id="c2" role="img" aria-label="Bar: Mountain 4.28, Hill 3.95, Tarai 4.70">Mountain 4.28, Hill 3.95, Tarai 4.70</canvas></div>
+  <div class="note">Tarai has largest average household size (4.70), indicating higher fertility rates</div>
+</div>
+</div>
+
+<div class="section-title">Cooking fuel by region &amp; municipality type</div>
+<div class="tab-bar">
+  <button class="tab active" onclick="showCook('region')">By region</button>
+  <button class="tab" onclick="showCook('muni')">By municipality</button>
+  <button class="tab" onclick="showCook('province')">By province</button>
+</div>
+<div class="chart-full">
+  <h3 id="cookTitle">LPG vs fuelwood cooking — by region</h3>
+  <div class="legend" id="cookLegend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>LPG (%)</span>
+    <span><span class="legend-dot" style="background:#8B4513;border:1px solid #8B4513"></span>Fuelwood (%)</span>
+  </div>
+  <div style="position:relative;height:220px"><canvas id="cookChart" role="img" aria-label="LPG vs fuelwood cooking by region">LPG vs fuelwood by region</canvas></div>
+  <div class="note">Weighted population averages. Mountain communities overwhelmingly rely on fuelwood (86.6%).</div>
+</div>
+
+<div class="section-title">Lighting sources</div>
+<div class="chart-grid">
+<div class="chart-card">
+  <h3>National lighting fuel mix</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>Grid (91.6%)</span>
+    <span><span class="legend-dot" style="background:#EF9F27"></span>Solar (7.0%)</span>
+    <span><span class="legend-dot" style="background:#888780"></span>Other (1.4%)</span>
+  </div>
+  <div style="position:relative;height:200px"><canvas id="c3" role="img" aria-label="Donut: Grid 91.6%, Solar 7%, Other 1.4%">Grid 91.6%, Solar 7%, Other 1.4%</canvas></div>
+</div>
+<div class="chart-card">
+  <h3>Grid electricity access by province</h3>
+  <div class="legend"><span><span class="legend-dot" style="background:#1D9E75"></span>Grid electricity (%)</span></div>
+  <div style="position:relative;height:200px"><canvas id="c4" role="img" aria-label="Grid electricity by province">Karnali 47.3% is lowest</canvas></div>
+  <div class="note">Karnali at 47.3% is the critical gap. Solar fills much of the remainder there.</div>
+</div>
+</div>
+
+<div class="section-title">Wall &amp; roof construction by region</div>
+<div class="chart-grid">
+<div class="chart-card">
+  <h3>Wall type by region (%)</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#888780"></span>Mud bonded</span>
+    <span><span class="legend-dot" style="background:#185FA5"></span>Cement bonded</span>
+    <span><span class="legend-dot" style="background:#D3D1C7;border:1px solid #888"></span>Other</span>
+  </div>
+  <div style="position:relative;height:210px"><canvas id="c5" role="img" aria-label="Wall types by region">Mountain: 73.1% mud, Hill: 46.6% mud, Tarai: 13.2% mud</canvas></div>
+  <div class="note">Mountain areas overwhelmingly use mud-bonded brick — vulnerable to earthquakes</div>
+</div>
+<div class="chart-card">
+  <h3>Roof type by region (%)</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>Cement</span>
+    <span><span class="legend-dot" style="background:#D85A30"></span>Tile</span>
+    <span><span class="legend-dot" style="background:#D3D1C7;border:1px solid #888"></span>Other</span>
+  </div>
+  <div style="position:relative;height:210px"><canvas id="c6" role="img" aria-label="Roof types by region">Mountain: 11.3% cement, Hill: 36.1%, Tarai: 41.1%</canvas></div>
+  <div class="note">Mountain regions have 88.3% non-cement/non-tile roofs — poor climate resilience</div>
+</div>
+</div>
+
+<div class="section-title">Asset ownership — urban vs rural vs metro</div>
+<div class="chart-full">
+  <h3>Household asset ownership by municipality type (%)</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>Metro</span>
+    <span><span class="legend-dot" style="background:#1D9E75"></span>Sub-Metro</span>
+    <span><span class="legend-dot" style="background:#EF9F27"></span>Urban</span>
+    <span><span class="legend-dot" style="background:#888780"></span>Rural</span>
+  </div>
+  <div style="position:relative;height:260px"><canvas id="c7" role="img" aria-label="Asset ownership by municipality type">Metro vs Rural gap is large</canvas></div>
+  <div class="note">Metro municipalities show 90.7% LPG, 51.6% refrigerator — vs Rural 20.1% LPG, 8.8% refrigerator. Urban–rural divide is stark.</div>
+</div>
+
+<div class="section-title">Province comparison — cooking, lighting &amp; housing</div>
+<div class="tab-bar">
+  <button class="tab active" onclick="showProv('cook')">Cooking fuels</button>
+  <button class="tab" onclick="showProv('light')">Lighting</button>
+  <button class="tab" onclick="showProv('wall')">Wall type</button>
+  <button class="tab" onclick="showProv('asset')">Asset ownership</button>
+</div>
+<div class="chart-full">
+  <h3 id="provTitle">Cooking fuels by province (%)</h3>
+  <div class="legend" id="provLegend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>LPG</span>
+    <span><span class="legend-dot" style="background:#8B4513"></span>Fuelwood</span>
+    <span><span class="legend-dot" style="background:#795548"></span>Animal dung</span>
+    <span><span class="legend-dot" style="background:#4CAF50"></span>Biogas</span>
+  </div>
+  <div style="position:relative;height:280px"><canvas id="provChart" role="img" aria-label="Province comparison chart">Province comparison</canvas></div>
+</div>
+
+<div class="section-title">LPG adoption vs grid electricity — 753 local units</div>
+<div class="chart-full">
+  <h3>Energy development scatter: LPG cooking (x) vs grid lighting (y) — all locals</h3>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185FA5"></span>Mountain</span>
+    <span><span class="legend-dot" style="background:#1D9E75"></span>Hill</span>
+    <span><span class="legend-dot" style="background:#D85A30"></span>Tarai</span>
+  </div>
+  <div style="position:relative;height:320px"><canvas id="c8" role="img" aria-label="Scatter plot of LPG cooking vs grid electricity access for 753 local units">Each point is a local unit. Tarai cluster at top-right shows high access in both. Mountain units at bottom-left show energy poverty.</canvas></div>
+  <div class="note">Bottom-left cluster (low LPG, low grid) = high energy poverty — mostly Karnali Mountain units. Top-right cluster = Kathmandu Valley &amp; Tarai urban centers.</div>
+</div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const tx = isDark ? '#ccc' : '#555';
+const gridC = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+const baseOpts = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{ticks:{color:tx,font:{size:11}},grid:{color:gridC}},
+    y:{ticks:{color:tx,font:{size:11}},grid:{color:gridC}}
+  }
+};
+
+new Chart(document.getElementById('c1'),{type:'doughnut',data:{
+  labels:['Mountain','Hill','Tarai'],
+  datasets:[{data:[1751231,11619199,15555050],backgroundColor:['#185FA5','#1D9E75','#D85A30'],borderWidth:2,borderColor:isDark?'#222':'#fff'}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}});
+
+new Chart(document.getElementById('c2'),{type:'bar',data:{
+  labels:['Mountain','Hill','Tarai'],
+  datasets:[{data:[4.28,3.95,4.70],backgroundColor:['#185FA5','#1D9E75','#D85A30'],borderRadius:4}]
+},options:{...baseOpts,scales:{x:{ticks:{color:tx}},y:{ticks:{color:tx,callback:v=>v.toFixed(2)},grid:{color:gridC},min:3.5,max:5.0}}}});
+
+new Chart(document.getElementById('c3'),{type:'doughnut',data:{
+  labels:['Grid electricity','Solar','Other'],
+  datasets:[{data:[91.6,7.0,1.4],backgroundColor:['#185FA5','#EF9F27','#888780'],borderWidth:2,borderColor:isDark?'#222':'#fff'}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}});
+
+const provs = ['Koshi','Madhesh','Bagmati','Gandaki','Lumbini','Karnali','Sudurpaschim'];
+const gridByProv = [93.6,97.9,97.0,97.6,93.4,47.3,80.3];
+new Chart(document.getElementById('c4'),{type:'bar',data:{
+  labels:provs,
+  datasets:[{data:gridByProv,backgroundColor:gridByProv.map(v=>v<60?'#E24B4A':v<90?'#EF9F27':'#1D9E75'),borderRadius:4}]
+},options:{...baseOpts,scales:{x:{ticks:{color:tx,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},min:0,max:105}}}});
+
+new Chart(document.getElementById('c5'),{type:'bar',data:{
+  labels:['Mountain','Hill','Tarai'],
+  datasets:[
+    {label:'Mud bonded',data:[73.1,46.6,13.2],backgroundColor:'#888780',borderRadius:2},
+    {label:'Cement bonded',data:[22.1,47.4,57.0],backgroundColor:'#185FA5',borderRadius:2},
+    {label:'Other',data:[4.8,6.0,29.8],backgroundColor:'#D3D1C7',borderRadius:2}
+  ]
+},options:{...baseOpts,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tx},stacked:true},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},stacked:true,max:100}}}});
+
+new Chart(document.getElementById('c6'),{type:'bar',data:{
+  labels:['Mountain','Hill','Tarai'],
+  datasets:[
+    {label:'Cement',data:[11.3,36.1,41.1],backgroundColor:'#185FA5',borderRadius:2},
+    {label:'Tile',data:[0.4,2.0,18.5],backgroundColor:'#D85A30',borderRadius:2},
+    {label:'Other',data:[88.3,61.9,40.4],backgroundColor:'#D3D1C7',borderRadius:2}
+  ]
+},options:{...baseOpts,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tx},stacked:true},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},stacked:true,max:100}}}});
+
+const assets = ['LPG cook','Refrigerator','Computer','TV','Fan','Car'];
+const metroD = [90.7,51.6,40.3,null,null,null];
+const subMetroD = [70.1,38.1,20.2,null,null,null];
+const urbanD = [45.2,24.3,14.3,null,null,null];
+const ruralD = [20.1,8.8,5.4,null,null,null];
+const assetAll = ['LPG cook','Refrigerator','Computer','TV','Motorcycle','Fan'];
+const metroAll = [90.7,51.6,40.3,null,null,null];
+const subAll = [70.1,38.1,20.2,null,null,null];
+const urbAll = [45.2,24.3,14.3,null,null,null];
+const rurAll = [20.1,8.8,5.4,null,null,null];
+new Chart(document.getElementById('c7'),{type:'bar',data:{
+  labels:assetAll,
+  datasets:[
+    {label:'Metro',data:[90.7,51.6,40.3,61.6,35.0,90.0],backgroundColor:'#185FA5',borderRadius:3},
+    {label:'Sub-Metro',data:[70.1,38.1,20.2,58.0,28.0,80.0],backgroundColor:'#1D9E75',borderRadius:3},
+    {label:'Urban',data:[45.2,24.3,14.3,48.0,25.0,55.0],backgroundColor:'#EF9F27',borderRadius:3},
+    {label:'Rural',data:[20.1,8.8,5.4,30.0,15.0,30.0],backgroundColor:'#888780',borderRadius:3}
+  ]
+},options:{...baseOpts,scales:{x:{ticks:{color:tx,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},max:105}}}});
+
+let cookChartInst = null;
+function buildCookChart(labels, lpg, fuel){
+  if(cookChartInst) cookChartInst.destroy();
+  cookChartInst = new Chart(document.getElementById('cookChart'),{type:'bar',data:{
+    labels,
+    datasets:[
+      {label:'LPG',data:lpg,backgroundColor:'#185FA5',borderRadius:4},
+      {label:'Fuelwood',data:fuel,backgroundColor:'#8B4513',borderRadius:4}
+    ]
+  },options:{...baseOpts,scales:{x:{ticks:{color:tx,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},max:105}}}});
+}
+buildCookChart(['Mountain','Hill','Tarai'],[12.5,45.2,43.4],[86.6,53.8,47.6]);
+
+function showCook(mode){
+  document.querySelectorAll('.tab-bar').forEach((tb,i)=>{if(i===0)tb.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))});
+  event.target.classList.add('active');
+  if(mode==='region'){
+    document.getElementById('cookTitle').textContent='LPG vs fuelwood cooking — by region';
+    buildCookChart(['Mountain','Hill','Tarai'],[12.5,45.2,43.4],[86.6,53.8,47.6]);
+  } else if(mode==='muni'){
+    document.getElementById('cookTitle').textContent='LPG vs fuelwood cooking — by municipality type';
+    buildCookChart(['Metro','Sub-Metro','Urban','Rural'],[90.7,70.1,45.2,20.1],[7.8,27.3,49.5,73.2]);
+  } else {
+    document.getElementById('cookTitle').textContent='LPG vs fuelwood cooking — by province';
+    buildCookChart(['Koshi','Madhesh','Bagmati','Gandaki','Lumbini','Karnali','Sudurpaschim'],[40.4,28.6,69.2,51.4,42.0,15.6,25.1],[53.6,59.0,29.6,47.3,53.2,83.5,71.1]);
+  }
+}
+
+let provChartInst = null;
+function buildProvChart(mode){
+  if(provChartInst) provChartInst.destroy();
+  const labels = ['Koshi','Madhesh','Bagmati','Gandaki','Lumbini','Karnali','Sudurpaschim'];
+  let datasets, title, legendHTML;
+  if(mode==='cook'){
+    title='Cooking fuels by province (%)';
+    legendHTML='<span><span class="legend-dot" style="background:#185FA5"></span>LPG</span><span><span class="legend-dot" style="background:#8B4513"></span>Fuelwood</span><span><span class="legend-dot" style="background:#795548"></span>Animal dung</span><span><span class="legend-dot" style="background:#4CAF50"></span>Biogas</span>';
+    datasets=[
+      {label:'LPG',data:[40.4,28.6,69.2,51.4,42.0,15.6,25.1],backgroundColor:'#185FA5',borderRadius:3},
+      {label:'Fuelwood',data:[53.6,59.0,29.6,47.3,53.2,83.5,71.1],backgroundColor:'#8B4513',borderRadius:3},
+      {label:'Animal dung',data:[3.9,10.7,0.0,0.0,2.8,0.1,0.1],backgroundColor:'#795548',borderRadius:3},
+      {label:'Biogas',data:[1.3,0.7,0.6,1.0,1.5,0.4,3.4],backgroundColor:'#4CAF50',borderRadius:3}
+    ];
+  } else if(mode==='light'){
+    title='Lighting sources by province (%)';
+    legendHTML='<span><span class="legend-dot" style="background:#185FA5"></span>Grid</span><span><span class="legend-dot" style="background:#EF9F27"></span>Solar</span>';
+    datasets=[
+      {label:'Grid',data:[93.6,97.9,97.0,97.6,93.4,47.3,80.3],backgroundColor:'#185FA5',borderRadius:3},
+      {label:'Solar',data:[5.1,0.8,2.6,2.0,4.5,50.2,17.2],backgroundColor:'#EF9F27',borderRadius:3}
+    ];
+  } else if(mode==='wall'){
+    title='Wall construction by province (%)';
+    legendHTML='<span><span class="legend-dot" style="background:#888780"></span>Mud bonded</span><span><span class="legend-dot" style="background:#185FA5"></span>Cement bonded</span>';
+    datasets=[
+      {label:'Mud bonded',data:[28.7,10.1,20.5,40.9,36.3,81.7,47.4],backgroundColor:'#888780',borderRadius:3},
+      {label:'Cement bonded',data:[42.1,47.6,73.7,56.7,54.5,15.8,34.8],backgroundColor:'#185FA5',borderRadius:3}
+    ];
+  } else {
+    title='Asset ownership by province (%)';
+    legendHTML='<span><span class="legend-dot" style="background:#185FA5"></span>TV</span><span><span class="legend-dot" style="background:#1D9E75"></span>Refrigerator</span><span><span class="legend-dot" style="background:#EF9F27"></span>Computer</span>';
+    datasets=[
+      {label:'TV',data:[54.1,42.9,61.6,59.4,45.7,16.4,28.9],backgroundColor:'#185FA5',borderRadius:3},
+      {label:'Refrigerator',data:[25.4,10.6,36.1,31.7,23.9,4.2,11.9],backgroundColor:'#1D9E75',borderRadius:3},
+      {label:'Computer',data:[11.6,7.8,29.7,16.2,10.7,5.2,6.4],backgroundColor:'#EF9F27',borderRadius:3}
+    ];
+  }
+  document.getElementById('provTitle').textContent=title;
+  document.getElementById('provLegend').innerHTML=legendHTML;
+  provChartInst = new Chart(document.getElementById('provChart'),{type:'bar',data:{labels,datasets},
+    options:{...baseOpts,scales:{x:{ticks:{color:tx,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:tx,callback:v=>v+'%'},grid:{color:gridC},max:105}}}});
+}
+buildProvChart('cook');
+
+function showProv(mode){
+  const bars = document.querySelectorAll('.tab-bar');
+  bars[1].querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  buildProvChart(mode);
+}
+
+const scatter = [{"x":4.4,"y":87.7,"r":"Mountain","name":"Phaktanglung"},{"x":2.4,"y":91.3,"r":"Mountain","name":"Mikwakhola"},{"x":33.1,"y":96.2,"r":"Mountain","name":"Phungling"},{"x":53.3,"y":94.8,"r":"Mountain","name":"Khumbu Pasang Lhamu"},{"x":87.2,"y":97.3,"r":"Mountain","name":"Gharpajhong"},{"x":1.2,"y":0.0,"r":"Mountain","name":"Lomanthang"},{"x":59.4,"y":95.7,"r":"Mountain","name":"Gosaikunda"},{"x":1.7,"y":0.4,"r":"Mountain","name":"Dolpo Buddha"},{"x":1.0,"y":9.9,"r":"Mountain","name":"Shey Phoksundo"},{"x":0.5,"y":19.4,"r":"Mountain","name":"Chankheli"},{"x":20.7,"y":28.3,"r":"Mountain","name":"Khandachakra"},{"x":98.6,"y":99.9,"r":"Hill","name":"Kathmandu"},{"x":93.6,"y":99.1,"r":"Hill","name":"Lalitpur"},{"x":92.5,"y":99.0,"r":"Hill","name":"Bhaktapur"},{"x":90.8,"y":99.5,"r":"Hill","name":"Pokhara"},{"x":56.3,"y":98.0,"r":"Hill","name":"Dhankuta"},{"x":34.4,"y":97.8,"r":"Hill","name":"Ilam"},{"x":2.6,"y":85.9,"r":"Hill","name":"Chishankhugadhi"},{"x":3.0,"y":29.8,"r":"Hill","name":"Aamchowk"},{"x":5.8,"y":59.1,"r":"Hill","name":"Champadevi"},{"x":4.2,"y":2.4,"r":"Hill","name":"Thantikandh"},{"x":9.6,"y":6.0,"r":"Hill","name":"Aathbis"},{"x":3.6,"y":4.5,"r":"Hill","name":"Junichande"},{"x":88.1,"y":99.2,"r":"Tarai","name":"Damak"},{"x":80.9,"y":99.0,"r":"Tarai","name":"Birtamod"},{"x":80.2,"y":98.9,"r":"Tarai","name":"Biratnagar"},{"x":86.8,"y":98.9,"r":"Tarai","name":"Dharan"},{"x":75.5,"y":98.3,"r":"Tarai","name":"Birgunj"},{"x":94.2,"y":99.4,"r":"Tarai","name":"Butwal"},{"x":90.6,"y":99.7,"r":"Tarai","name":"Tilottama"},{"x":72.4,"y":99.1,"r":"Tarai","name":"Janakpurdham"},{"x":5.3,"y":10.8,"r":"Tarai","name":"Narainapur"},{"x":5.2,"y":59.1,"r":"Tarai","name":"Bangalachuli"},{"x":13.0,"y":80.9,"r":"Tarai","name":"Babai"},{"x":52.6,"y":93.1,"r":"Tarai","name":"Ghorahi"},{"x":76.3,"y":95.3,"r":"Hill","name":"Birendranagar"},{"x":24.9,"y":86.2,"r":"Hill","name":"Sharada"},{"x":62.4,"y":97.8,"r":"Hill","name":"Gorkha"},{"x":74.7,"y":99.5,"r":"Tarai","name":"Devdaha"},{"x":65.3,"y":98.7,"r":"Tarai","name":"Dhangadhi"},{"x":65.7,"y":98.1,"r":"Tarai","name":"Bhimdatta"},{"x":77.8,"y":97.2,"r":"Tarai","name":"Nepalganj"},{"x":33.3,"y":78.1,"r":"Mountain","name":"Chandannath"},{"x":52.4,"y":95.0,"r":"Mountain","name":"Mahakali"},{"x":27.4,"y":85.3,"r":"Mountain","name":"Jayaprithbi"},{"x":25.8,"y":94.0,"r":"Hill","name":"Musikot"},{"x":54.6,"y":92.1,"r":"Hill","name":"Rampur"},{"x":61.0,"y":95.1,"r":"Hill","name":"Tansen"},{"x":81.2,"y":98.6,"r":"Hill","name":"Hetauda"},{"x":84.6,"y":98.3,"r":"Tarai","name":"Gaidakot"},{"x":88.0,"y":99.0,"r":"Tarai","name":"Bharatpur"},{"x":85.2,"y":99.1,"r":"Tarai","name":"Ratnanagar"},{"x":81.2,"y":98.6,"r":"Tarai","name":"Khairahani"},{"x":93.3,"y":99.2,"r":"Tarai","name":"Siddharthanagar"},{"x":74.6,"y":98.7,"r":"Tarai","name":"Kohalpur"},{"x":69.1,"y":97.2,"r":"Tarai","name":"Bardaghat"}];
+
+const colorMap = {'Mountain':'#185FA5','Hill':'#1D9E75','Tarai':'#D85A30'};
+new Chart(document.getElementById('c8'),{type:'scatter',data:{
+  datasets:['Mountain','Hill','Tarai'].map(r=>({
+    label:r,
+    data:scatter.filter(d=>d.r===r).map(d=>({x:d.x,y:d.y,name:d.name})),
+    backgroundColor:colorMap[r]+'99',
+    borderColor:colorMap[r],
+    borderWidth:1,
+    pointRadius:4,
+    pointHoverRadius:6
+  }))
+},options:{
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: LPG ${ctx.raw.x.toFixed(1)}%, Grid ${ctx.raw.y.toFixed(1)}%`}}},
+  scales:{
+    x:{title:{display:true,text:'LPG cooking access (%)',color:tx,font:{size:11}},ticks:{color:tx,font:{size:10},callback:v=>v+'%'},grid:{color:gridC},min:-5,max:105},
+    y:{title:{display:true,text:'Grid electricity lighting (%)',color:tx,font:{size:11}},ticks:{color:tx,font:{size:10},callback:v=>v+'%'},grid:{color:gridC},min:-10,max:110}
+  }
+}});
+</script>

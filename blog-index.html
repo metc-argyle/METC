@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>METC Blogs and Research Articles</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f7faf8;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1280px;
+      margin: auto;
+    }
+
+    /* ================= HERO ================= */
+
+    .hero {
+      position: relative;
+      height: 55vh;
+      overflow: hidden;
+    }
+
+    .slideshow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      animation: fade 40s infinite;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .slide:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .slide:nth-child(2) {
+      animation-delay: 5s;
+    }
+
+    .slide:nth-child(3) {
+      animation-delay: 10s;
+    }
+
+    .slide:nth-child(4) {
+      animation-delay: 15s;
+    }
+
+    .slide:nth-child(5) {
+      animation-delay: 20s;
+    }
+
+    .slide:nth-child(6) {
+      animation-delay: 25s;
+    }
+
+    .slide:nth-child(7) {
+      animation-delay: 30s;
+    }
+
+    .slide:nth-child(8) {
+      animation-delay: 35s;
+    }
+
+    @keyframes fade {
+      0% {
+        opacity: 0;
+      }
+      5% {
+        opacity: 1;
+      }
+      12% {
+        opacity: 1;
+      }
+      17% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+    }
+
+    .hero-content h1 {
+      font-size: 3.8rem;
+      line-height: 1.1;
+      font-weight: 700;
+      max-width: 900px;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-content p {
+      max-width: 760px;
+      margin: auto;
+      font-size: 1.15rem;
+      color: #e5e7eb;
+    }
+
+    /* ================= NAV ================= */
+
+    nav {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.75);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.4rem;
+    }
+
+    .nav-links a {
+      font-size: 0.95rem;
+      color: #374151;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #0f766e;
+    }
+
+    /* ================= SECTION ================= */
+
+    section {
+      padding: 5rem 0;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title h2 {
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      color: #111827;
+    }
+
+    .section-title p {
+      color: #6b7280;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    /* ================= GRID ================= */
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+    }
+
+    .card img {
+      height: 180px;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.9rem;
+      color: #111827;
+    }
+
+    .card p {
+      color: #6b7280;
+      font-size: 0.96rem;
+      margin-bottom: 1rem;
+    }
+
+    .read-more {
+      color: #0f766e;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* ================= INSIGHTS ================= */
+
+    .insights {
+      background: linear-gradient(to right, #0f172a, #134e4a);
+      color: white;
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .insights h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .insights p {
+      max-width: 750px;
+      margin: auto;
+      color: #d1d5db;
+    }
+
+    /* ================= FOOTER ================= */
+
+    footer {
+      background: #0f172a;
+      color: #d1d5db;
+      padding: 2rem 0;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    footer p {
+      font-size: 0.95rem;
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 2.4rem;
+      }
+
+      .hero-content p {
+        font-size: 1rem;
+      }
+
+      .nav-links {
+        gap: 0.8rem;
+        font-size: 0.85rem;
+      }
+
+      .section-title h2 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================= NAVBAR ================= -->
+
+  <nav>
+    <div class="container nav-wrapper">
+      <div class="logo">METC Research Articles, Blogs and Models</div>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#">Research</a>
+        <a href="#">Blogs</a>
+        <a href="#">Models</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= HERO / SLIDESHOW ================= -->
+
+  <header class="hero">
+
+    <div class="slideshow">
+
+      <!-- Attached Image 1 -->
+      <div
+        class="slide"
+        style="background-image: url('images/river-energy.jpg');">
+      </div>
+
+      <!-- Attached Image 2 -->
+      <div
+        class="slide"
+        style="background-image: url('images/heritage-energy.jpg');">
+      </div>
+
+      <!-- Attached Image 3 -->
+      <div
+        class="slide"
+        style="background-image: url('images/city-mobility.jpg');">
+      </div>
+
+      <!-- Copyright-free Unsplash Images -->
+      <div
+        class="slide"
+        style="background-image: url('images/bridge.jpg');">
+      </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/newyork.jpg');">
+      </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/worldnight.jpg');">
+      </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/solar.jpg');">
+      </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/river-energy.jpg');">
+      </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/mustang2.jpg');">
+      </div>
+    </div>
+
+      <div
+        class="slide"
+        style="background-image: url('images/argyle.jpg');">
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <div>
+        <h1>
+          Clean Energy Transition, Economy & Environment
+        </h1>
+
+        <p>
+          Exploring sustainable energy systems, policy innovation,
+          economic transformation, data visualization, and practical
+          energy modeling tutorials for developing regions, including Nepal, Asian and African countries.
+        </p>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ================= Blogs ================= -->
+
+  <section>
+    <div class="container">
+
+      <div class="section-title">
+        <h2>Latest Interactive Dashboard Blogs</h2>
+        <p>
+          Data visualization, Dashboard, In-depth Insights for students, researchers, policy makers and stakeholders.
+        </p>
+      </div>
+
+      <div class="grid">
+
+        <!-- CARD 1 -->
+        <div class="card">
+          <img
+            src="images/bhkatapur.jpg"
+            alt="Solar Energy" />
+
+          <div class="card-content">
+            <span class="tag">Nepal Energy and Economy</span>
+            <h3>Nepal Energy-Economy Policy Dashboard and Insights</h3>
+            <p>
+              Macroeconomic overview, earthquake and covid-19 shock events, dominance of service sector, and energy and electricity consumption trends and insights.
+            </p>
+            <a class="read-more" href="blogs/national_dashboard.html">Read Blog →</a>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="card">
+          <img
+            src="images/nepalmap.jpg"
+            alt="Wind Energy" />
+
+          <div class="card-content">
+            <span class="tag">Provinces, Nepal</span>
+            <h3>Provincial Socio-Economic Dashboard and Insights</h3>
+            <p>
+              Understanding population and households distribution, energy access, economy and households assets and welfare across the provinces in Nepal.
+            </p>
+            <a class="read-more" href="blogs/province_dashboard.html">Read Blogs →</a>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="card">
+          <img
+            src="images/kathmandu.jpg"
+            alt="Urban Sustainability" />
+
+          <div class="card-content">
+            <span class="tag">Districts, Nepal</span>
+            <h3>District-level Socio-Economic Dashboard and Insights</h3>
+            <p>
+              Population and households distribution, cooking energy access, household assets across the districts in Nepal.
+            </p>
+            <a class="read-more" href="blogs/district_dashboard.html">Read Blog →</a>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+         
+        <div class="card">
+          <img
+            src="images/cook.jpg"
+            alt="Data Visualization" />
+
+          <div class="card-content">
+            <span class="tag">Local-level, Nepal</span>
+            <h3>Local-level Socio-Economic Dashboard and Insights</h3>
+            <p>
+              Data visualization of socio-economic status and insights of local-levels in Nepal.
+            </p>
+            <a class="read-more" href="blogs/local_dashboard.html">Read Blogs →</a>
+          </div>
+        </div>
+
+        <!-- CARD 5 -->
+        <div class="card">
+          <img
+            src="images/EV.jpg"
+            alt="Hydropower" />
+
+          <div class="card-content">
+            <span class="tag">Electric Vehicles</span>
+            <h3>Prospect of Electric Vehicle in Nepal</h3>
+            <p>
+              Exploring recent trend in importing electric, hybrid and non electric vehicles and their impact on electricity demand and economy in Nepal.
+            </p>
+            <a class="read-more" href="blogs/ev_dashboard.html">Read Blogs →</a>
+          </div>
+        </div>
+
+        <!-- CARD 6 -->
+        <div class="card">
+          <img
+            src="images/induction.jpg"
+            alt="Energy Access" />
+
+          <div class="card-content">
+            <span class="tag">Household Electric Appliances</span>
+            <h3>Household Electric Appliances</h3>
+            <p>
+              Exploring recent trend in importing household electric appliances and their impact on electricity demand and economy in Nepal.
+            </p>
+            <a class="read-more" href="blogs/ea_dashboard.html">Read Blogs →</a>
+          </div>
+        </div>
+
+        <!-- CARD 7 -->
+        <div class="card">
+          <img
+            src="images/lpg.jpg"
+            alt="Energy Access" />
+
+          <div class="card-content">
+            <span class="tag">Clean Cooking</span>
+            <h3>Clean Cooking and Rural Energy Access in Nepal</h3>
+            <p>
+              Forthcoming........
+            </p>
+            <a class="read-more" href="#">Read Blogs →</a>
+          </div>
+        </div>
+        
+        <!-- CARD 8 -->
+        <div class="card">
+          <img
+            src="images/visualization.jpg"
+            alt="Energy Access" />
+
+          <div class="card-content">
+            <span class="tag">CAR Energy Demand</span>
+            <h3>Energy demand analysis in Central African Republic (CAR)</h3>
+            <p>
+              Forthcoming........
+            </p>
+            <a class="read-more" href="#">Read Blogs →</a>
+          </div>
+        </div>
+        
+        <!-- CARD 9 -->
+        <div class="card">
+          <img
+            src="images/bulb.jpg"
+            alt="Energy Access" />
+
+          <div class="card-content">
+            <span class="tag">Illuminating Nepal</span>
+            <h3>Electricity demand for lighting in Nepal</h3>
+            <p>
+              Forthcoming..........
+            </p>
+            <a class="read-more" href="#">Read Blogs →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Research Articles ================= -->
+
+  <section style="background:#eef6f2;">
+    <div class="container">
+
+      <div class="section-title">
+        <h2>Latest Rsearch Articles & Tutorials</h2>
+        <p>
+          Research Articles, Tutorials, and insights, for students, researchers,
+          analysts, and policymakers.
+        </p>
+      </div>
+
+      <div class="grid">
+
+        <div class="card">
+          <img
+            src="images/cook.jpg"
+            alt="Policy" />
+
+          <div class="card-content">
+            <span class="tag">Policy Insights</span>
+            <h3>Household cooking in Nepal: An economic analysis</h3>
+            <p>
+              The residential sector is a major energy consumer in Nepal, with cooking being a primary end-use. Unprocessed solid biomass fuels are the main cooking fuels, with about 60% of households relying on them. However, LPG, which is entirely imported, is becoming popular in urban areas. Electricity, mainly generated from hydropower, an environmentally friendly domestic energy source, was used for cooking in less than 1% of households. This paper analyzes the cost economics of different technologies and fuels, or their combinations, for household cooking across different topographies in Nepal from both private and social viewpoints. It shows that electricity is generally cheaper than fossil fuels but more expensive than biomass from a private perspective. When accounting for local air pollutant costs, especially PM2.5, electricity emerges as the most affordable option for cooking, except for biogas, which also has minimal external costs. The study further explores the broader economic advantages of replacing imported LPG with domestic hydropower for household cooking.
+            </p>
+            <a class="read-more" href="https://doi.org/10.1016/j.enpol.2026.115194">Read Article →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img
+            src="images/analysis.jpg"
+            alt="Python Data" />
+
+          <div class="card-content">
+            <span class="tag">Model Tutorial</span>
+            <h3>Getting Started with Energy System Modeling</h3>
+            <p>
+              A beginner-friendly End Use Energy Demand Anlysis for Developing Coutries using open-source datasets. Forthcoming ....................
+            </p>
+            <a class="read-more" href="#">Read Article →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img
+            src="images/butwal.jpg"
+            alt="Analytics" />
+
+          <div class="card-content">
+            <span class="tag">Environment</span>
+            <h3>Assessment of mobility and its impact on energy use and air pollution in Nepal</h3>
+            <p>
+              Understanding of existing motorized and non-motorized transport services is a key challenge for landlocked Nepal in addressing sustainable transport system development. This paper assesses mobility and estimates current travel demand, energy use and emissions from different transport modes for Kathmandu (capital city) and for rest of the country. Road transport dominates all transport modes in Nepal. In per-capita terms, country's motorized road passenger travel (1461 km) is amongst the lowest in the world. Private vehicles (mainly motor cycle) in Kathmandu and public vehicles (mainly bus) in rest of the country, dominate road passenger travel. Trucks dominate in freight transport services. More than half of country's total commercial energy is consumed by transport sector. Kathmandu alone consumes country's half of gasoline and 20% of diesel supply. The current level of country's road energy use, based on road energy use index, remains one of the lowest in the world. However, emissions of local air pollutant from motor vehicles are significant and they are likely responsible for deteriorating air quality in the country's urban areas. Although less significant in the global context, transport sector is responsible for more than half of country's total energy-related CO2 emissions.
+            </p>
+            <a class="read-more" href="https://doi.org/10.1016/j.energy.2014.03.041">Read Article →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img
+            src="images/kathmandu.jpg"
+            alt="Policy" />
+
+          <div class="card-content">
+            <span class="tag">Policy Insights</span>
+            <h3>Economic and policy analysis of cleaner technologies for brick production in Nepal</h3>
+            <p>
+              Nepal has suffered heavily from local and transboundary air pollution, particularly PM2.5. Coal-fired brick production is one of the main sources of air pollution. The government has prioritized the agenda of reducing the air pollution from the brick industry, for which an economic analysis of adopting cleaner production technologies is imperative. This study analyzes the economics of various options to adopt cleaner technologies and reduce coal consumption to lower emissions from Nepal's brick industry. The results show that private costs of brick production vary from NRs 15.6 (US$ 0.12) per brick to NRs. 44.2 (US$ 0.34) per brick, depending on production technologies. If costs of externalities of major local air pollutant, PM2.5, and global emission, CO2, are accounted for, social costs or the sum of private and externality costs, of brick production would be 18 % to 131 % higher than the private costs depending upon the production technologies. A 50 % hike in coal prices would increase brick prices from 11 % to 35 %. Similarly, brick production costs would increase by 2 % to 6 % at a US $10/tCO2 carbon tax and 12 % to 36 % at a US$100/tCO2 carbon tax. Brick production costs would drop if wood pellets were mixed with coal, partially replacing it. At current prices, an equal mixing of coal and wood pellets would reduce production costs by 13 % in zigzag kilns. Findings of the study imply that increased coal pricing either through increased import duty or introduction of a carbon tax, and substitution of coal with pellets or cofiring provisions, and increased use of non-fired or alternative bricks would be esired policy options to reduce coal consumption in the brick industry in Nepal. However, implementation of these policies requires the availability of lower-cost clean alternatives by altering existing policies in the supply chain, particularly forest policies. Additional promotional policies, such as pricing and mandatory use in selected applications, would help promote non-fired alternative bricks.
+            </p>
+            <a class="read-more" href="https://doi.org/10.1016/j.enpol.2025.114741">Read Article →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img
+            src="images/Gandruk.jpg"
+            alt="Python Data" />
+
+          <div class="card-content">
+            <span class="tag">Policy Insights</span>
+            <h3>Household transitions to clean energy from traditional biomass in Nepal: Challenges and opportunities</h3>
+            <p>
+              In recent years, the Nepal government has recognized and prioritized several clean energy initiatives in its national plans and policies. Despite this, more than two-thirds of households still rely on traditional biomass, as their primary source of energy, for cooking and heating, making the household fuelwood consumption per person in Nepal among the highest in the world. However, why households' transitions to clean energy for cooking is slow has been poorly understood. Using energy-specific information from the World Bank's Multi-Tier Framework (MTF) survey and the Nepal government's Multiple Indicator Cluster Survey (MICS), the cooking and heating energy consumption situation of households across the provinces by rural and urban areas is analyzed briefly. Also, a simple levelized cost of cooking is estimated using different fuel-technology combinations. The main findings of this paper are: limited availability, unreliable supply and high costs are hindering households' transitions to clean energy from traditional biomass; the combination of fuelwood, liquified petroleum gas and other clean energy sources (multiple fuel stacking) are common within the same household; and, the use of biogas, and to some extent, solar power, for cooking is limited to scale and geographical location. It is expected that electricity will be the most economic and common primary clean cooking energy option for households in the future provided that the government has the policy to address the reliability concerns of electricity and that it is affordable for low income households.
+            </p>
+            <a class="read-more" href="https://www.nepjol.info/index.php/nppr/article/view/43420">Read Article →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img
+            src="images/electricity2.jpg"
+            alt="Analytics" />
+
+          <div class="card-content">
+            <span class="tag">Energy Policy</span>
+            <h3>CO2 emissions from electricity generation in seven Asia-Pacific and North American countries: A decomposition analysis</h3>
+            <p>
+              The Logarithmic Mean Divisia Index (LMDI) method of complete decomposition is used to examine the role of three factors (electricity production, electricity generation structure and energy intensity of electricity generation) affecting the evolution of CO2 emissions from electricity generation in sevencountries. These seven countries together generated 58% of global electricity and they are responsible for more than two-thirds of global CO2 emissions from electricity generation in 2005. The analysis shows production effect as the major factor responsible for rise in CO2 emissions during the period 1990 to 2005. The generation structure effect also contributed in CO2 emissions increase, although at a slower rate. In contrary, the energy intensity effect is responsible for modest reduction in CO2 emissions during this period. Over the 2005 to 2030 period, production effect remains the key factor responsible for increase in emissions and energy intensity effect is responsible for decrease in emissions. Unlike in the past, generation structure effect contributes significant decrease in emissions. However, the degree of influence of these factors affecting changes in CO2 emissions vary from country to country. The analysis also shows that there is a potential of efficiency improvement of fossil-fuel-fired power plants and its associated co-benefits among these countries.
+            </p>
+            <a class="read-more" href="https://doi.org/10.1016/j.enpol.2008.08.010">Read Article →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSIGHTS SECTION ================= -->
+
+  <section>
+    <div class="container">
+      <div class="insights">
+        <h2>Building Knowledge for Sustainable Futures</h2>
+
+        <p>
+          This platform shares interdisciplinary research and applied
+          insights connecting economy, environment, technology,
+          governance, and energy systems for sustainable development in
+          emerging regions across the globe.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+
+  <footer>
+    <div class="container">
+      <p>
+        © 2026 METC LLC (www.MallaET.com) · Built for research,
+        sustainability, and open knowledge.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepal Energy–Economy Policy Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+:root {
+  --teal-dark: #0a3d47;
+  --teal: #0D4F5C;
+  --teal-mid: #1a6b7a;
+  --teal-light: #2a8fa3;
+  --teal-pale: #d4eef3;
+  --amber: #E8A020;
+  --amber-light: #f5c460;
+  --amber-pale: #fdf3dc;
+  --red: #C0392B;
+  --red-light: #e74c3c;
+  --green: #27ae60;
+  --green-light: #2ecc71;
+  --slate: #F4F6F8;
+  --slate-mid: #e8ecf0;
+  --text-dark: #1a2932;
+  --text-mid: #3d5260;
+  --text-light: #7a9aaa;
+  --card-bg: #ffffff;
+  --border: #d0dde3;
+  --shadow: 0 4px 24px rgba(13,79,92,0.10);
+  --shadow-lg: 0 8px 40px rgba(13,79,92,0.16);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--slate);
+  color: var(--text-dark);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── HEADER ── */
+#header {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 50%, var(--teal-mid) 100%);
+  color: white;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.header-flag {
+  font-size: 32px;
+  line-height: 1;
+}
+.header-titles { flex: 1; }
+.header-titles h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.header-titles h1 span { color: var(--amber); }
+.header-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+.header-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.3px;
+}
+.badge.amber { background: var(--amber); border-color: var(--amber); color: var(--teal-dark); }
+
+/* ── NAV TABS ── */
+#nav-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 28px;
+  background: var(--teal-dark);
+  overflow-x: auto;
+}
+.nav-tab {
+  padding: 10px 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  user-select: none;
+}
+.nav-tab:hover { color: rgba(255,255,255,0.85); border-bottom-color: rgba(255,255,255,0.3); }
+.nav-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+/* ── GLOBAL FILTER BAR ── */
+#filter-bar {
+  background: white;
+  border-bottom: 2px solid var(--teal-pale);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(13,79,92,0.06);
+}
+.filter-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+}
+.filter-group { display: flex; align-items: center; gap: 8px; }
+.year-select {
+  background: var(--slate);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 13px;
+  color: var(--text-dark);
+  cursor: pointer;
+  outline: none;
+}
+.year-select:focus { border-color: var(--teal-light); }
+.shock-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.shock-toggle input { cursor: pointer; accent-color: var(--teal); }
+.filter-sep { width: 1px; height: 24px; background: var(--border); }
+
+/* ── MAIN LAYOUT ── */
+#main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 28px;
+}
+
+/* ── SECTIONS ── */
+.section { display: none; }
+.section.active { display: block; }
+
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--teal);
+  border-left: 4px solid var(--amber);
+  padding-left: 12px;
+  margin-bottom: 20px;
+}
+
+/* ── KPI CARDS ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.kpi-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border-top: 4px solid var(--teal);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--teal-pale);
+  opacity: 0.5;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.kpi-card.amber { border-top-color: var(--amber); }
+.kpi-card.green { border-top-color: var(--green); }
+.kpi-card.red { border-top-color: var(--red); }
+.kpi-icon { font-size: 22px; margin-bottom: 8px; }
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--teal);
+  line-height: 1;
+}
+.kpi-card.amber .kpi-value { color: var(--amber); }
+.kpi-card.green .kpi-value { color: var(--green); }
+.kpi-card.red .kpi-value { color: var(--red); }
+.kpi-unit { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+.kpi-change { font-size: 12px; margin-top: 6px; font-weight: 600; }
+.kpi-change.up { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+
+/* ── CHART CARDS ── */
+.chart-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.chart-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.chart-grid-full {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.chart-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.chart-card:hover { box-shadow: var(--shadow-lg); }
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+.chart-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+.chart-source {
+  font-size: 10px;
+  color: var(--text-light);
+  margin-top: 3px;
+}
+.chart-unit {
+  font-size: 11px;
+  background: var(--teal-pale);
+  color: var(--teal);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chart-container { position: relative; }
+.chart-container canvas { max-height: 280px; }
+.chart-container-tall canvas { max-height: 340px; }
+.chart-container-sm canvas { max-height: 200px; }
+
+/* ── SECTION FILTER ── */
+.section-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  background: var(--teal-pale);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.section-filter label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--teal);
+}
+
+/* ── INSIGHT PANELS ── */
+.insight-card {
+  background: white;
+  border-left: 4px solid var(--teal);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.insight-card.amber { border-left-color: var(--amber); }
+.insight-card.red { border-left-color: var(--red); }
+.insight-card.green { border-left-color: var(--green); }
+.insight-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+.insight-content h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--teal);
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+}
+.insight-card.amber .insight-content h4 { color: #b87a10; }
+.insight-card.red .insight-content h4 { color: var(--red); }
+.insight-card.green .insight-content h4 { color: #1e8449; }
+.insight-content p { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+.insight-content p strong { color: var(--text-dark); }
+
+/* ── SHOCK LEGEND ── */
+.shock-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.shock-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.shock-dot { width: 12px; height: 12px; border-radius: 2px; }
+.shock-dot.eq { background: var(--red); }
+.shock-dot.covid { background: rgba(231,76,60,0.25); border: 1px solid var(--red-light); }
+
+/* ── SPARKLINE CARDS ── */
+.sparkline-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.spark-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.spark-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.spark-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--teal);
+  letter-spacing: 0.3px;
+}
+.spark-arrow { font-size: 22px; font-weight: 800; }
+.spark-arrow.up { color: var(--green); }
+.spark-arrow.down { color: var(--red); }
+.spark-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--teal-dark);
+  margin-bottom: 2px;
+}
+.spark-change { font-size: 11px; color: var(--text-light); }
+.spark-change strong { color: var(--green); }
+
+/* ── FOOTER ── */
+#footer {
+  background: var(--teal-dark);
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  padding: 18px 28px;
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 40px;
+}
+#footer strong { color: rgba(255,255,255,0.85); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.section.active .chart-card,
+.section.active .kpi-card,
+.section.active .insight-card,
+.section.active .spark-card {
+  animation: fadeUp 0.35s ease forwards;
+}
+
+@media print {
+  #header { position: relative; }
+  #filter-bar, #nav-tabs { display: none; }
+  .section { display: block !important; }
+  .chart-card, .kpi-card { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="header-inner">
+    <div class="header-flag">🇳🇵</div>
+    <div class="header-titles">
+      <h1>Nepal <span>Energy–Economy</span> Policy Dashboard</h1>
+      <div class="header-sub">Annual Indicators | FY 2010/11–2025/26 | Sources: National Statistical Office (NSO) & Nepal Rastra Bank (NRB) 2026</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge">16 Fiscal Years</span>
+      <span class="badge">BS + AD Calendar</span>
+      <span class="badge amber">Policy Analytics</span>
+    </div>
+  </div>
+  <div id="nav-tabs">
+    <div class="nav-tab active" data-section="s1">📊 Macroeconomy</div>
+    <div class="nav-tab" data-section="s2">🔄 Trade & Remittances</div>
+    <div class="nav-tab" data-section="s3">🏗 Sectoral Value Added</div>
+    <div class="nav-tab" data-section="s4">⚡ Energy Consumption</div>
+    <div class="nav-tab" data-section="s5">💡 Electricity & Per Capita</div>
+  </div>
+</div>
+
+<!-- GLOBAL FILTER BAR -->
+<div id="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Year Range</span>
+    <select class="year-select" id="yearStart"></select>
+    <span style="color:var(--text-light); font-size:13px;">to</span>
+    <select class="year-select" id="yearEnd"></select>
+  </div>
+  <div class="filter-sep"></div>
+  <label class="shock-toggle"><input type="checkbox" id="toggleEQ" checked> 🔴 2015 Earthquake</label>
+  <label class="shock-toggle"><input type="checkbox" id="toggleCovid" checked> 🟠 COVID-19 (2019–2021)</label>
+  <div class="filter-sep"></div>
+  <span class="filter-label" style="color:var(--text-mid); font-style:italic;">All charts update with selection</span>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- ═══════════════════════════════════════════ SECTION 1 ═══════ -->
+  <div class="section active" id="s1">
+    <div class="section-title">📊 Macroeconomic Overview</div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon">🏔</div>
+        <div class="kpi-label">Latest GDP</div>
+        <div class="kpi-value" id="kpi-gdp">2,900.8</div>
+        <div class="kpi-unit">Billion NRs (constant 2011 prices)</div>
+        <div class="kpi-change up" id="kpi-gdp-chg">↑ +86% since 2010/11</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">Population</div>
+        <div class="kpi-value" id="kpi-pop">30.3</div>
+        <div class="kpi-unit">Million</div>
+        <div class="kpi-change up" id="kpi-pop-chg">↑ +14% since 2010/11</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Per Capita Real GDP</div>
+        <div class="kpi-value" id="kpi-pcgdp">95.8</div>
+        <div class="kpi-unit">Thousand NRs</div>
+        <div class="kpi-change up" id="kpi-pcgdp-chg">↑ +63% since 2010/11</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">💱</div>
+        <div class="kpi-label">Exchange Rate</div>
+        <div class="kpi-value" id="kpi-xrate">144.0</div>
+        <div class="kpi-unit">NRs per 1 US$</div>
+        <div class="kpi-change down" id="kpi-xrate-chg">↑ Depreciated +99% since 2010/11</div>
+      </div>
+    </div>
+
+    <div class="insight-card red">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-content">
+        <h4>Shock Events: Earthquake 2015 & COVID-19 2019–2021</h4>
+        <p>The <strong>2015 earthquake</strong> (FY 2015/16) suppressed GDP growth to near-zero (~0.4%). <strong>COVID-19</strong> caused Nepal's first GDP contraction in decades in FY 2019/20 (−2.4%), with exports collapsing to 6.8% of GDP. Both shocks exposed Nepal's structural fragility and dependence on external inflows.</p>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">GDP at Constant 2011 Prices & Year-on-Year Growth Rate</div>
+            <div class="chart-source">Source: NSO 2026 | Both BS and AD fiscal years shown in tooltips</div>
+          </div>
+          <span class="chart-unit">Billion NRs / % Growth</span>
+        </div>
+        <div class="shock-legend">
+          <div class="shock-item"><div class="shock-dot eq"></div> Earthquake FY 2015/16</div>
+          <div class="shock-item"><div class="shock-dot covid"></div> COVID-19 FY 2019/20–2020/21</div>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-gdp"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Per Capita Real GDP Trend</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">Thousand NRs</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-pcgdp"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Population Growth Trajectory</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">Million</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-pop"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ SECTION 2 ═══════ -->
+  <div class="section" id="s2">
+    <div class="section-title">🔄 Trade, Remittances & External Sector</div>
+
+    <div class="insight-card amber">
+      <div class="insight-icon">💸</div>
+      <div class="insight-content">
+        <h4>Remittance Dependency — A Structural Vulnerability</h4>
+        <p>Remittances as % of GDP rose from <strong>16.3% in 2010/11 to 33.0% in 2025/26</strong> — among the highest globally. This masks a chronic trade deficit. Nepal's consumption and import capacity is financed by migrant labor abroad, creating systemic vulnerability to global labor market shocks.</p>
+      </div>
+    </div>
+
+    <div class="insight-card red">
+      <div class="insight-icon">📉</div>
+      <div class="insight-content">
+        <h4>Import Compression — Chronic Trade Deficit</h4>
+        <p>Imports of goods and services consistently exceed <strong>30% of GDP</strong>, peaking at <strong>42.3% in 2021/22</strong> (post-COVID pent-up demand surge). Exports remain persistently weak at 7–10% of GDP. Nepal's trade deficit is structural and enduring, financed primarily by remittances.</p>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Exports, Imports & Remittances as % of GDP</div>
+            <div class="chart-source">Source: NSO & NRB 2026</div>
+          </div>
+          <span class="chart-unit">% of GDP</span>
+        </div>
+        <div class="shock-legend">
+          <div class="shock-item"><div class="shock-dot eq"></div> Earthquake FY 2015/16</div>
+          <div class="shock-item"><div class="shock-dot covid"></div> COVID-19 FY 2019/20–2020/21</div>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-trade"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Trade Deficit (Imports − Exports) as % of GDP</div>
+            <div class="chart-source">Source: NSO 2026 | Computed series</div>
+          </div>
+          <span class="chart-unit">% of GDP</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-deficit"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Exchange Rate Trend</div>
+            <div class="chart-source">Source: NRB 2026</div>
+          </div>
+          <span class="chart-unit">NRs per USD</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-xrate"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ SECTION 3 ═══════ -->
+  <div class="section" id="s3">
+    <div class="section-title">🏗 Sectoral Value Added</div>
+
+    <div class="insight-card">
+      <div class="insight-icon">🏢</div>
+      <div class="insight-content">
+        <h4>Services Sector Dominance — Tertiary-Led Growth</h4>
+        <p>Services sector contributed <strong>~55% of GDP in 2025/26</strong>, driven by wholesale/retail trade and finance/insurance. Agriculture has declined from 33.4% to 28.6%. Industry remains underdeveloped at ~16%. This tertiary-led growth lacks the productive capacity of manufacturing, limiting employment quality and export potential.</p>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Sectoral Value Added: Agriculture / Industry / Services</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">% of GDP</span>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-sectors"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Services vs Industry VA — Structural Divergence</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">% of GDP</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-srv-ind"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Services Sub-sector Breakdown</div>
+            <div class="chart-source">Source: NSO 2026 | NSIC Classification</div>
+          </div>
+          <span class="chart-unit">% of Services GDP</span>
+        </div>
+        <div class="section-filter">
+          <label>Select Year:</label>
+          <select class="year-select" id="srvYear"></select>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-subsector"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ SECTION 4 ═══════ -->
+  <div class="section" id="s4">
+    <div class="section-title">⚡ Energy Consumption & Mix</div>
+
+    <div class="insight-card amber">
+      <div class="insight-icon">🪵</div>
+      <div class="insight-content">
+        <h4>The Energy Paradox — Fuelwood Despite High Electricity Access</h4>
+        <p>Despite electricity access reaching <strong>99% by 2024/25</strong>, traditional biomass — especially <strong>fuelwood — remains the dominant cooking fuel</strong> at ~70–80% of traditional energy. This energy paradox signals that access alone does not drive transition; <strong>appliance affordability, tariff structures, and behavioral change</strong> are critical missing links.</p>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Total Final Energy Consumption by Category</div>
+            <div class="chart-source">Source: NSO 2026 | n.a. = data not available for FY 2024/25–2025/26</div>
+          </div>
+          <span class="chart-unit">ktoe</span>
+        </div>
+        <div class="shock-legend">
+          <div class="shock-item"><div class="shock-dot eq"></div> Earthquake FY 2015/16</div>
+          <div class="shock-item"><div class="shock-dot covid"></div> COVID-19 FY 2019/20–2020/21</div>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-energy-stack"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Fuelwood vs Commercial Electricity — Energy Transition Gap</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">ktoe</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-fw-elec"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Energy Mix by Fuel Type — Selected Year</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">ktoe (% share)</span>
+        </div>
+        <div class="section-filter">
+          <label>Select Year:</label>
+          <select class="year-select" id="energyYear"></select>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-energy-donut"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ SECTION 5 ═══════ -->
+  <div class="section" id="s5">
+    <div class="section-title">💡 Electricity Access & Per Capita Indicators</div>
+
+    <div class="insight-card green">
+      <div class="insight-icon">🔌</div>
+      <div class="insight-content">
+        <h4>Electricity Access — A Remarkable Achievement</h4>
+        <p>Nepal's electricity access rose from <strong>~58% in 2012/13 to 99% in 2024/25</strong> — a remarkable expansion within a decade. However, per capita consumption (412 kWh in 2024/25) remains very low by regional standards, signaling that access has outpaced <strong>productive and cooking-use uptake</strong>. Infrastructure built; behavioral transition lagging.</p>
+      </div>
+    </div>
+
+    <div class="sparkline-row">
+      <div class="spark-card">
+        <div class="spark-top">
+          <div class="spark-label">Per Capita Real GDP</div>
+          <div class="spark-arrow up">↑</div>
+        </div>
+        <div class="spark-val">95.8</div>
+        <div class="spark-unit" style="font-size:11px;color:var(--text-light);">Thousand NRs (2025/26)</div>
+        <div class="spark-change">From 58.9 → <strong>+62.8% growth</strong> since 2010/11</div>
+        <div class="chart-container-sm" style="margin-top:10px;"><canvas id="spark1"></canvas></div>
+      </div>
+      <div class="spark-card">
+        <div class="spark-top">
+          <div class="spark-label">Per Capita Electricity</div>
+          <div class="spark-arrow up">↑</div>
+        </div>
+        <div class="spark-val">412</div>
+        <div class="spark-unit" style="font-size:11px;color:var(--text-light);">kWh (2024/25)</div>
+        <div class="spark-change">From 103 kWh → <strong>+300% growth</strong> since 2010/11</div>
+        <div class="chart-container-sm" style="margin-top:10px;"><canvas id="spark2"></canvas></div>
+      </div>
+      <div class="spark-card">
+        <div class="spark-top">
+          <div class="spark-label">Per Capita Energy</div>
+          <div class="spark-arrow up">↑</div>
+        </div>
+        <div class="spark-val">518</div>
+        <div class="spark-unit" style="font-size:11px;color:var(--text-light);">kgoe (2021/22, latest)</div>
+        <div class="spark-change">From 383 kgoe → <strong>+35% growth</strong> since 2010/11</div>
+        <div class="chart-container-sm" style="margin-top:10px;"><canvas id="spark3"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Electricity Access % vs. Per Capita Electricity Consumption</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <span class="chart-unit">% / kWh</span>
+        </div>
+        <div class="shock-legend">
+          <div class="shock-item"><div class="shock-dot eq"></div> Earthquake FY 2015/16</div>
+          <div class="shock-item"><div class="shock-dot covid"></div> COVID-19 FY 2019/20–2020/21</div>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-access"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid-full">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Electricity Consumption by Sector (GWh)</div>
+            <div class="chart-source">Source: NSO 2026</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <label class="shock-toggle"><input type="checkbox" id="togHH" checked> Household</label>
+            <label class="shock-toggle"><input type="checkbox" id="togInd" checked> Industry</label>
+            <label class="shock-toggle"><input type="checkbox" id="togSrv" checked> Services</label>
+            <label class="shock-toggle"><input type="checkbox" id="togExp" checked> Export</label>
+            <label class="shock-toggle"><input type="checkbox" id="togOth" checked> Others</label>
+          </div>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="chart-elec-sector"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div id="footer">
+   <strong>Copyright: METC LLC (www.mallaET.com)</strong>  |  <strong>Nepal Energy–Economy Policy Dashboard</strong><br>
+  Data: <strong>National Statistical Office (NSO) Nepal 2026</strong> & <strong>Nepal Rastra Bank (NRB) 2026</strong><br>
+  Fiscal years displayed in both Bikram Sambat (BS) and Gregorian (AD) calendars &nbsp;|&nbsp;
+  <em>n.a. = data not available | Energy data unavailable for FY 2024/25 and FY 2025/26</em>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════
+const RAW = [
+  {bs:"2067/68",ad:"2010/11",gdp:1559.22,pop:26.49,pcgdp:58.85,xrate:72.27,exp:7.81,imp:28.49,rem:16.26,agri:33.45,ind:14.54,srv:52.01,wrt:29.56,trn:10.34,hosp:3.28,ict:4.21,fin:9.17,re:19.21,prof:1.66,adm:0.76,pub:8.57,edu:10.08,hlth:2.26,oth:0.89,tradE:8500,fw:7606,ar:331,ad_:563,commE:1580,coal:293,oil:1058,elecC:229,renew:75,totE:10155,hhGwh:1169,indGwh:1002,srvGwh:204,expGwh:31,othGwh:322,totGwh:2728,pcElec:102.96,access:null,pcEnergy:383.29},
+  {bs:"2068/69",ad:"2011/12",gdp:1632.04,pop:26.85,pcgdp:60.78,xrate:81.02,exp:8.75,imp:29.17,rem:20.45,agri:33.56,ind:14.67,srv:51.78,wrt:29.07,trn:10.57,hosp:3.34,ict:5.14,fin:8.94,re:18.64,prof:1.67,adm:0.79,pub:8.49,edu:10.19,hlth:2.26,oth:0.89,tradE:7032,fw:6274,ar:310,ad_:448,commE:1679,coal:348,oil:1083,elecC:248,renew:109,totE:8820,hhGwh:1343,indGwh:1124,srvGwh:241,expGwh:4,othGwh:333,totGwh:3045,pcElec:113.40,access:null,pcEnergy:328.46},
+  {bs:"2069/70",ad:"2012/13",gdp:1689.57,pop:27.21,pcgdp:62.08,xrate:87.96,exp:9.29,imp:32.57,rem:22.29,agri:32.98,ind:14.63,srv:52.40,wrt:28.64,trn:10.97,hosp:3.42,ict:5.45,fin:8.74,re:18.21,prof:1.67,adm:0.87,pub:8.55,edu:10.34,hlth:2.25,oth:0.89,tradE:8017,fw:7153,ar:353,ad_:511,commE:1854,coal:415,oil:1182,elecC:257,renew:166,totE:10037,hhGwh:1402,indGwh:1141,srvGwh:257,expGwh:4,othGwh:352,totGwh:3156,pcElec:115.38,access:57.81,pcEnergy:368.81},
+  {bs:"2070/71",ad:"2013/14",gdp:1791.14,pop:27.58,pcgdp:64.94,xrate:98.21,exp:10.12,imp:35.86,rem:24.34,agri:32.59,ind:14.86,srv:52.55,wrt:28.64,trn:11.01,hosp:3.27,ict:6.47,fin:8.77,re:17.45,prof:1.68,adm:0.95,pub:8.46,edu:10.23,hlth:2.18,oth:0.87,tradE:8983,fw:8154,ar:403,ad_:426,commE:1958,coal:320,oil:1264,elecC:374,renew:291,totE:11232,hhGwh:1571,indGwh:1252,srvGwh:285,expGwh:3,othGwh:385,totGwh:3496,pcElec:123.98,access:59.66,pcEnergy:407.22},
+  {bs:"2071/72",ad:"2014/15",gdp:1862.36,pop:27.95,pcgdp:66.62,xrate:99.49,exp:10.21,imp:36.45,rem:25.47,agri:31.86,ind:14.65,srv:53.49,wrt:28.32,trn:11.06,hosp:3.28,ict:6.79,fin:8.90,re:16.81,prof:1.72,adm:1.00,pub:8.69,edu:10.25,hlth:2.29,oth:0.89,tradE:9104,fw:8264,ar:408,ad_:432,commE:2331.44,coal:465,oil:1469.16,elecC:397.28,renew:292.12,totE:11727.56,hhGwh:1679,indGwh:1352,srvGwh:300,expGwh:3,othGwh:410,totGwh:3744,pcElec:132.65,access:61.94,pcEnergy:419.52},
+  {bs:"2072/73",ad:"2015/16",gdp:1870.42,pop:27.63,pcgdp:67.70,xrate:106.35,exp:8.18,imp:33.94,rem:25.50,agri:31.83,ind:14.04,srv:54.13,wrt:27.27,trn:10.95,hosp:2.98,ict:6.83,fin:9.58,re:16.68,prof:1.73,adm:1.11,pub:8.76,edu:10.85,hlth:2.34,oth:0.92,tradE:9228,fw:8376,ar:414,ad_:438,commE:2248.20,coal:536.25,oil:1275.39,elecC:436.56,renew:292.49,totE:11768.69,hhGwh:1797,indGwh:1206,srvGwh:286,expGwh:3,othGwh:427,totGwh:3719,pcElec:130.78,access:63.19,pcEnergy:425.94},
+  {bs:"2073/74",ad:"2016/17",gdp:2038.34,pop:27.88,pcgdp:73.10,xrate:106.21,exp:7.81,imp:36.83,rem:22.60,agri:30.83,ind:15.15,srv:54.02,wrt:27.86,trn:10.55,hosp:3.12,ict:7.16,fin:9.71,re:16.01,prof:1.74,adm:1.19,pub:8.73,edu:10.73,hlth:2.32,oth:0.89,tradE:9319.45,fw:8459.40,ar:418.09,ad_:441.96,commE:3252.59,coal:663.97,oil:2088,elecC:500.62,renew:294,totE:12866.04,hhGwh:2164,indGwh:1719,srvGwh:351,expGwh:3,othGwh:540,totGwh:4777,pcElec:164.32,access:68.30,pcEnergy:461.42},
+  {bs:"2074/75",ad:"2017/18",gdp:2193.71,pop:28.14,pcgdp:77.96,xrate:104.37,exp:7.82,imp:40.63,rem:21.85,agri:29.46,ind:15.57,srv:54.97,wrt:29.89,trn:10.79,hosp:3.20,ict:6.69,fin:9.72,re:14.88,prof:1.67,adm:1.29,pub:8.37,edu:10.40,hlth:2.25,oth:0.85,tradE:9473,fw:8604,ar:425,ad_:444,commE:3714.91,coal:761.87,oil:2388.41,elecC:564.63,renew:296.31,totE:13484.22,hhGwh:2442,indGwh:2074,srvGwh:408,expGwh:3,othGwh:633,totGwh:5560,pcElec:198,access:74.46,pcEnergy:479.19},
+  {bs:"2075/76",ad:"2018/19",gdp:2339.74,pop:28.40,pcgdp:82.39,xrate:112.88,exp:7.78,imp:41.47,rem:22.79,agri:29.12,ind:15.71,srv:55.16,wrt:30.27,trn:10.99,hosp:3.30,ict:6.71,fin:9.68,re:14.46,prof:1.65,adm:1.29,pub:8.24,edu:10.32,hlth:2.25,oth:0.85,tradE:9601,fw:8720,ar:431,ad_:450,commE:4114.50,coal:970,oil:2633,elecC:511.50,renew:298.60,totE:14014.10,hhGwh:2666,indGwh:2422,srvGwh:466,expGwh:35,othGwh:749,totGwh:6338,pcElec:233,access:78,pcEnergy:493.49},
+  {bs:"2076/77",ad:"2019/20",gdp:2284.30,pop:28.66,pcgdp:79.71,xrate:116.31,exp:6.81,imp:34.11,rem:22.50,agri:30.57,ind:15.46,srv:53.97,wrt:28.10,trn:10.15,hosp:2.18,ict:7.17,fin:10.11,re:15.46,prof:1.75,adm:1.38,pub:9.16,edu:11.15,hlth:2.48,oth:0.90,tradE:9624.09,fw:8761.97,ar:435.57,ad_:426.55,commE:4488.32,coal:1046.35,oil:2894.53,elecC:547.45,renew:351.64,totE:14464.05,hhGwh:2852,indGwh:2301,srvGwh:487,expGwh:107,othGwh:781,totGwh:6528,pcElec:240,access:86.44,pcEnergy:504.71},
+  {bs:"2077/78",ad:"2020/21",gdp:2394.82,pop:28.92,pcgdp:82.80,xrate:117.87,exp:5.12,imp:37.93,rem:22.08,agri:30.09,ind:15.82,srv:54.09,wrt:28.61,trn:10.13,hosp:2.31,ict:7.10,fin:10.10,re:15.18,prof:1.70,adm:1.35,pub:9.05,edu:11.07,hlth:2.52,oth:0.89,tradE:9901.12,fw:9023.37,ar:448.61,ad_:429.14,commE:4719.22,coal:1435.68,oil:2657.82,elecC:625.72,renew:307.15,totE:14927.49,hhGwh:3138,indGwh:2816,srvGwh:511,expGwh:44,othGwh:809,totGwh:7318,pcElec:246.4,access:89.7,pcEnergy:516.14},
+  {bs:"2078/79",ad:"2021/22",gdp:2529.68,pop:29.19,pcgdp:86.67,xrate:120.84,exp:6.70,imp:42.27,rem:20.24,agri:29.26,ind:16.64,srv:54.11,wrt:29.18,trn:10.06,hosp:2.47,ict:7.02,fin:10.26,re:14.66,prof:1.67,adm:1.30,pub:8.94,edu:11.00,hlth:2.56,oth:0.88,tradE:9929,fw:8905,ar:762,ad_:262,commE:4842,coal:1111,oil:2839,elecC:892,renew:359,totE:15130,hhGwh:3719,indGwh:3443,srvGwh:655,expGwh:493,othGwh:1007,totGwh:9317,pcElec:307,access:92.51,pcEnergy:518.38},
+  {bs:"2079/80",ad:"2022/23",gdp:2579.83,pop:29.46,pcgdp:87.58,xrate:130.75,exp:7.01,imp:34.56,rem:23.12,agri:29.47,ind:16.47,srv:54.06,wrt:27.39,trn:9.98,hosp:2.85,ict:7.16,fin:10.83,re:14.76,prof:1.70,adm:1.33,pub:9.23,edu:11.19,hlth:2.67,oth:0.91,tradE:8121.68,fw:7275.85,ar:612,ad_:233.83,commE:4200.76,coal:812.46,oil:2468.90,elecC:919.40,renew:394,totE:12716.44,hhGwh:3896.70,indGwh:3586.21,srvGwh:736.66,expGwh:1332.92,othGwh:1143.41,totGwh:10695.90,pcElec:380,access:95,pcEnergy:431.69},
+  {bs:"2080/81",ad:"2023/24",gdp:2674.71,pop:29.73,pcgdp:89.97,xrate:133.03,exp:7.55,imp:32.62,rem:25.09,agri:29.39,ind:15.97,srv:54.64,wrt:26.13,trn:10.84,hosp:3.30,ict:7.19,fin:11.40,re:14.44,prof:1.69,adm:1.33,pub:9.03,edu:11.03,hlth:2.71,oth:0.92,tradE:7383,fw:6610,ar:552,ad_:221,commE:4785,coal:960,oil:2735,elecC:1090,renew:432,totE:12600,hhGwh:4309,indGwh:3694,srvGwh:826,expGwh:1951,othGwh:1398,totGwh:12178,pcElec:400,access:97,pcEnergy:423.81},
+  {bs:"2081/82",ad:"2024/25",gdp:2793.22,pop:30.01,pcgdp:93.09,xrate:136.29,exp:8.83,imp:33.72,rem:27.80,agri:29.18,ind:15.89,srv:54.93,wrt:26.01,trn:11.12,hosp:3.31,ict:7.22,fin:11.75,re:14.22,prof:1.69,adm:1.33,pub:8.91,edu:10.81,hlth:2.72,oth:0.92,tradE:null,fw:null,ar:null,ad_:null,commE:null,coal:null,oil:null,elecC:null,renew:null,totE:null,hhGwh:null,indGwh:null,srvGwh:null,expGwh:null,othGwh:null,totGwh:null,pcElec:412,access:99,pcEnergy:null},
+  {bs:"2082/83",ad:"2025/26",gdp:2900.80,pop:30.28,pcgdp:95.79,xrate:144.03,exp:9.97,imp:34.52,rem:33.02,agri:28.59,ind:16.20,srv:55.21,wrt:26.08,trn:11.29,hosp:3.27,ict:7.31,fin:12.30,re:14.01,prof:1.67,adm:1.33,pub:8.57,edu:10.53,hlth:2.72,oth:0.91,tradE:null,fw:null,ar:null,ad_:null,commE:null,coal:null,oil:null,elecC:null,renew:null,totE:null,hhGwh:null,indGwh:null,srvGwh:null,expGwh:null,othGwh:null,totGwh:null,pcElec:null,access:null,pcEnergy:null}
+];
+
+// ── Year indices for shock annotations
+const EQ_IDX = 5;   // 2015/16
+const COV1_IDX = 9; // 2019/20
+const COV2_IDX = 10; // 2020/21
+
+const PALETTE = {
+  teal:     '#0D4F5C',
+  tealMid:  '#1a6b7a',
+  tealLight:'#2a8fa3',
+  tealPale: 'rgba(42,143,163,0.15)',
+  amber:    '#E8A020',
+  amberPale:'rgba(232,160,32,0.15)',
+  red:      '#C0392B',
+  redPale:  'rgba(192,57,43,0.12)',
+  green:    '#27ae60',
+  greenPale:'rgba(39,174,96,0.15)',
+  grey:     '#95a5a6',
+  slate:    '#bdc3c7',
+};
+
+Chart.register(window['chartjs-plugin-annotation']);
+
+// ── State
+let startIdx = 0;
+let endIdx = RAW.length - 1;
+let showEQ = true;
+let showCovid = true;
+const charts = {};
+
+// ── Filtered data helper
+function fd() { return RAW.slice(startIdx, endIdx + 1); }
+function labels(data) { return data.map(d => d.ad); }
+function dualLabel(d) { return `${d.bs} | ${d.ad}`; }
+
+// ── Shock annotation builder
+function shockAnnotations(data) {
+  const ann = {};
+  const global = RAW;
+  data.forEach((d, i) => {
+    const globalIdx = global.indexOf(d);
+    if (showEQ && globalIdx === EQ_IDX) {
+      ann['eqLine'] = {
+        type: 'line', xMin: i, xMax: i,
+        borderColor: PALETTE.red, borderWidth: 2, borderDash: [6,3],
+        label: { content: '🔴 Earthquake', display: true, position: 'start',
+          backgroundColor: PALETTE.red, color: 'white', font: { size: 10, weight: 'bold' }, padding: 4 }
+      };
+    }
+    if (showCovid && (globalIdx === COV1_IDX || globalIdx === COV2_IDX)) {
+      const key = globalIdx === COV1_IDX ? 'cov1' : 'cov2';
+      ann[key] = {
+        type: 'box', xMin: i - 0.5, xMax: i + 0.5,
+        backgroundColor: 'rgba(231,76,60,0.10)', borderColor: 'rgba(231,76,60,0.4)',
+        borderWidth: 1,
+        label: { content: globalIdx === COV1_IDX ? '🟠 COVID-19' : '', display: globalIdx === COV1_IDX,
+          position: 'start', backgroundColor: 'rgba(231,76,60,0.85)', color: 'white',
+          font: { size: 9, weight: 'bold' }, padding: 3, yAdjust: -10 }
+      };
+    }
+  });
+  return ann;
+}
+
+// ── Common chart defaults
+const baseFont = { family: "'Source Sans 3', sans-serif", size: 11 };
+const baseTick = { color: '#7a9aaa', font: baseFont };
+
+function commonOpts(extra={}) {
+  return {
+    responsive: true, maintainAspectRatio: true,
+    animation: { duration: 600 },
+    plugins: {
+      legend: { labels: { font: baseFont, color: '#3d5260', boxWidth: 12, padding: 10 } },
+      tooltip: {
+        backgroundColor: 'rgba(10,61,71,0.95)',
+        titleFont: { family: "'Barlow Condensed', sans-serif", size: 13, weight: 'bold' },
+        bodyFont: baseFont, padding: 10, cornerRadius: 8,
+        callbacks: {
+          title: (items) => {
+            const idx = items[0].dataIndex + startIdx;
+            return dualLabel(RAW[idx] || RAW[items[0].dataIndex]);
+          }
+        }
+      },
+      annotation: { annotations: {} }
+    },
+    scales: {
+      x: { ticks: { ...baseTick, maxRotation: 45, minRotation: 0 }, grid: { color: '#e8ecf0' } },
+      y: { ticks: baseTick, grid: { color: '#e8ecf0' } }
+    },
+    ...extra
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BUILD ALL CHARTS
+// ══════════════════════════════════════════════════════════════════
+
+function buildGDP() {
+  const data = fd();
+  const lbl = labels(data);
+  const gdpVals = data.map(d => +d.gdp.toFixed(1));
+  const growthVals = data.map((d,i) => i===0 ? null : +((d.gdp/data[i-1].gdp - 1)*100).toFixed(2));
+  const ctx = document.getElementById('chart-gdp').getContext('2d');
+  if (charts['gdp']) charts['gdp'].destroy();
+  const opts = commonOpts({
+    scales: {
+      x: { ticks: { ...baseTick, maxRotation: 45 }, grid: { color: '#e8ecf0' } },
+      y: { type:'linear', position:'left', title:{ display:true, text:'GDP (Billion NRs)', font:baseFont, color:PALETTE.teal }, ticks: baseTick, grid: { color: '#e8ecf0' } },
+      y2: { type:'linear', position:'right', title:{ display:true, text:'YoY Growth (%)', font:baseFont, color:PALETTE.amber }, ticks: { ...baseTick, color: PALETTE.amber }, grid: { drawOnChartArea:false } }
+    }
+  });
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => {
+    const i = items[0].dataIndex; return dualLabel(data[i]);
+  };
+  charts['gdp'] = new Chart(ctx, {
+    data: {
+      labels: lbl,
+      datasets: [
+        { type:'line', label:'GDP (Billion NRs)', data: gdpVals, borderColor: PALETTE.teal, backgroundColor: 'rgba(13,79,92,0.12)', fill:true, tension:0.35, yAxisID:'y', pointRadius:3, pointHoverRadius:6 },
+        { type:'bar', label:'YoY Growth (%)', data: growthVals, backgroundColor: growthVals.map(v => v!==null && v<0 ? PALETTE.red : PALETTE.amber), yAxisID:'y2', barPercentage:0.5 }
+      ]
+    },
+    options: opts
+  });
+}
+
+function buildPCGDP() {
+  const data = fd();
+  const ctx = document.getElementById('chart-pcgdp').getContext('2d');
+  if (charts['pcgdp']) charts['pcgdp'].destroy();
+  const opts = commonOpts();
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'Thousand NRs', font:baseFont, color:PALETTE.teal };
+  charts['pcgdp'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(data), datasets: [{
+      label:'Per Capita Real GDP', data: data.map(d=>+d.pcgdp.toFixed(2)),
+      borderColor: PALETTE.tealLight, backgroundColor: PALETTE.tealPale, fill:true, tension:0.35, pointRadius:3
+    }]},
+    options: opts
+  });
+}
+
+function buildPop() {
+  const data = fd();
+  const ctx = document.getElementById('chart-pop').getContext('2d');
+  if (charts['pop']) charts['pop'].destroy();
+  const opts = commonOpts();
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'Million', font:baseFont, color:PALETTE.amber };
+  charts['pop'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(data), datasets: [{
+      label:'Population', data: data.map(d=>+d.pop.toFixed(2)),
+      borderColor: PALETTE.amber, backgroundColor: PALETTE.amberPale, fill:true, tension:0.35, pointRadius:3
+    }]},
+    options: opts
+  });
+}
+
+function buildTrade() {
+  const data = fd();
+  const ctx = document.getElementById('chart-trade').getContext('2d');
+  if (charts['trade']) charts['trade'].destroy();
+  const opts = commonOpts();
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'% of GDP', font:baseFont, color:PALETTE.teal };
+  charts['trade'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(data), datasets: [
+      { label:'Imports % GDP', data: data.map(d=>+d.imp.toFixed(2)), borderColor: PALETTE.red, backgroundColor:'rgba(192,57,43,0.07)', fill:true, tension:0.35, pointRadius:3, borderWidth:2.5 },
+      { label:'Remittances % GDP', data: data.map(d=>+d.rem.toFixed(2)), borderColor: PALETTE.amber, backgroundColor:'rgba(232,160,32,0.08)', fill:true, tension:0.35, pointRadius:3, borderWidth:2.5 },
+      { label:'Exports % GDP', data: data.map(d=>+d.exp.toFixed(2)), borderColor: PALETTE.tealLight, backgroundColor:'rgba(42,143,163,0.07)', fill:true, tension:0.35, pointRadius:3, borderWidth:2.5 }
+    ]},
+    options: opts
+  });
+}
+
+function buildDeficit() {
+  const data = fd();
+  const ctx = document.getElementById('chart-deficit').getContext('2d');
+  if (charts['deficit']) charts['deficit'].destroy();
+  const vals = data.map(d => +(d.imp - d.exp).toFixed(2));
+  const opts = commonOpts();
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'% of GDP', font:baseFont, color:PALETTE.red };
+  charts['deficit'] = new Chart(ctx, {
+    type:'bar',
+    data: { labels: labels(data), datasets: [{
+      label:'Trade Deficit (Imports − Exports)',
+      data: vals,
+      backgroundColor: vals.map(v => v > 35 ? '#922b21' : v > 28 ? PALETTE.red : '#e59866'),
+      borderRadius: 4
+    }]},
+    options: opts
+  });
+}
+
+function buildXRate() {
+  const data = fd();
+  const ctx = document.getElementById('chart-xrate').getContext('2d');
+  if (charts['xrate']) charts['xrate'].destroy();
+  const opts = commonOpts();
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'NRs per USD', font:baseFont, color:PALETTE.amber };
+  charts['xrate'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(data), datasets: [{
+      label:'Exchange Rate', data: data.map(d=>+d.xrate.toFixed(2)),
+      borderColor: PALETTE.amber, backgroundColor: PALETTE.amberPale, fill:true, tension:0.3, pointRadius:3
+    }]},
+    options: opts
+  });
+}
+
+function buildSectors() {
+  const data = fd();
+  const ctx = document.getElementById('chart-sectors').getContext('2d');
+  if (charts['sectors']) charts['sectors'].destroy();
+  const opts = commonOpts({ scales: {
+    x: { stacked:true, ticks:{...baseTick,maxRotation:45}, grid:{color:'#e8ecf0'} },
+    y: { stacked:true, title:{display:true,text:'% of GDP',font:baseFont,color:PALETTE.teal}, ticks:baseTick, grid:{color:'#e8ecf0'} }
+  }});
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  charts['sectors'] = new Chart(ctx, {
+    type:'bar',
+    data: { labels: labels(data), datasets: [
+      { label:'Services VA %', data: data.map(d=>+d.srv.toFixed(2)), backgroundColor:'rgba(13,79,92,0.75)', borderRadius:0 },
+      { label:'Industry VA %', data: data.map(d=>+d.ind.toFixed(2)), backgroundColor:'rgba(232,160,32,0.80)', borderRadius:0 },
+      { label:'Agriculture VA %', data: data.map(d=>+d.agri.toFixed(2)), backgroundColor:'rgba(39,174,96,0.75)', borderRadius:0 }
+    ]},
+    options: opts
+  });
+}
+
+function buildSrvInd() {
+  const data = fd();
+  const ctx = document.getElementById('chart-srv-ind').getContext('2d');
+  if (charts['srvind']) charts['srvind'].destroy();
+  const opts = commonOpts();
+  opts.plugins.annotation.annotations = shockAnnotations(data);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  opts.scales.y.title = { display:true, text:'% of GDP', font:baseFont, color:PALETTE.teal };
+  const srvVals = data.map(d=>+d.srv.toFixed(2));
+  const indVals = data.map(d=>+d.ind.toFixed(2));
+  charts['srvind'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(data), datasets: [
+      { label:'Services VA %', data: srvVals, borderColor: PALETTE.teal, backgroundColor:'rgba(13,79,92,0.08)', fill:'+1', tension:0.35, pointRadius:3, borderWidth:2.5 },
+      { label:'Industry VA %', data: indVals, borderColor: PALETTE.amber, backgroundColor:'rgba(232,160,32,0.08)', fill:false, tension:0.35, pointRadius:3, borderWidth:2.5 }
+    ]},
+    options: opts
+  });
+}
+
+// Services sub-sector - separate year picker
+let srvChart = null;
+function buildSubsector(yearIdx) {
+  const d = RAW[yearIdx];
+  const ctx = document.getElementById('chart-subsector').getContext('2d');
+  if (srvChart) srvChart.destroy();
+  const keys = ['wrt','trn','hosp','ict','fin','re','prof','adm','pub','edu','hlth','oth'];
+  const names = ['Wholesale/Retail','Transportation','Hospitality','ICT','Finance/Insurance','Real Estate','Professional/Sci.','Administrative','Public Admin.','Education','Health','Others'];
+  const vals = keys.map(k => +d[k].toFixed(2));
+  const colors = [PALETTE.teal, PALETTE.tealMid, PALETTE.tealLight, PALETTE.amber, '#d4ac0d','#8e44ad','#2980b9','#16a085','#c0392b','#27ae60','#e67e22','#95a5a6'];
+  srvChart = new Chart(ctx, {
+    type:'bar',
+    data: { labels: names, datasets: [{ label:'% of Services GDP', data:vals, backgroundColor:colors, borderRadius:4 }]},
+    options: {
+      indexAxis:'y', responsive:true, maintainAspectRatio:true, animation:{duration:400},
+      plugins: { legend:{display:false}, tooltip:{ backgroundColor:'rgba(10,61,71,0.95)', bodyFont:baseFont, padding:8, cornerRadius:6 }},
+      scales: {
+        x: { title:{display:true,text:'% of Services GDP',font:baseFont,color:PALETTE.teal}, ticks:baseTick, grid:{color:'#e8ecf0'} },
+        y: { ticks:{...baseTick,font:{size:11}}, grid:{display:false} }
+      }
+    }
+  });
+}
+
+function buildEnergyStack() {
+  const data = fd().filter(d => d.tradE !== null);
+  const ctx = document.getElementById('chart-energy-stack').getContext('2d');
+  if (charts['estack']) charts['estack'].destroy();
+  const idxMap = data.map(d => RAW.indexOf(d));
+  const opts = commonOpts({ scales: {
+    x: { stacked:true, ticks:{...baseTick,maxRotation:45}, grid:{color:'#e8ecf0'} },
+    y: { stacked:true, title:{display:true,text:'ktoe',font:baseFont,color:PALETTE.teal}, ticks:baseTick, grid:{color:'#e8ecf0'} }
+  }});
+  // Build annotations relative to filtered data indices
+  const ann = {};
+  data.forEach((d, i) => {
+    const gi = RAW.indexOf(d);
+    if (showEQ && gi === EQ_IDX) ann['eq'] = { type:'line', xMin:i, xMax:i, borderColor:PALETTE.red, borderWidth:2, borderDash:[6,3], label:{content:'🔴 Earthquake',display:true,position:'start',backgroundColor:PALETTE.red,color:'white',font:{size:10,weight:'bold'},padding:4}};
+    if (showCovid && (gi === COV1_IDX || gi === COV2_IDX)) ann[`cov${i}`] = { type:'box', xMin:i-0.5, xMax:i+0.5, backgroundColor:'rgba(231,76,60,0.10)', borderColor:'rgba(231,76,60,0.4)', borderWidth:1, label:{content:gi===COV1_IDX?'🟠 COVID':'',display:gi===COV1_IDX,position:'start',backgroundColor:'rgba(231,76,60,0.85)',color:'white',font:{size:9},padding:3,yAdjust:-10}};
+  });
+  opts.plugins.annotation.annotations = ann;
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  charts['estack'] = new Chart(ctx, {
+    type:'bar',
+    data: { labels: data.map(d=>d.ad), datasets: [
+      { label:'Fuelwood', data: data.map(d=>d.fw), backgroundColor:'rgba(139,90,43,0.80)', borderRadius:0 },
+      { label:'Agri. Residue', data: data.map(d=>d.ar), backgroundColor:'rgba(186,154,90,0.80)', borderRadius:0 },
+      { label:'Animal Dung', data: data.map(d=>d.ad_), backgroundColor:'rgba(210,180,120,0.80)', borderRadius:0 },
+      { label:'Coal', data: data.map(d=>d.coal), backgroundColor:'rgba(80,80,80,0.80)', borderRadius:0 },
+      { label:'Oil', data: data.map(d=>d.oil), backgroundColor:'rgba(192,57,43,0.80)', borderRadius:0 },
+      { label:'Electricity (comm.)', data: data.map(d=>d.elecC), backgroundColor:'rgba(13,79,92,0.90)', borderRadius:0 },
+      { label:'Renewable', data: data.map(d=>d.renew), backgroundColor:'rgba(39,174,96,0.80)', borderRadius:0 }
+    ]},
+    options: opts
+  });
+}
+
+function buildFWElec() {
+  const data = fd().filter(d => d.fw !== null);
+  const ctx = document.getElementById('chart-fw-elec').getContext('2d');
+  if (charts['fwelec']) charts['fwelec'].destroy();
+  const opts = commonOpts({ scales: {
+    x: { ticks:{...baseTick,maxRotation:45}, grid:{color:'#e8ecf0'} },
+    y: { type:'linear', position:'left', title:{display:true,text:'Fuelwood (ktoe)',font:baseFont,color:'#8b5a2b'}, ticks:baseTick, grid:{color:'#e8ecf0'} },
+    y2: { type:'linear', position:'right', title:{display:true,text:'Electricity comm. (ktoe)',font:baseFont,color:PALETTE.teal}, ticks:{...baseTick,color:PALETTE.teal}, grid:{drawOnChartArea:false} }
+  }});
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  charts['fwelec'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: data.map(d=>d.ad), datasets: [
+      { label:'Fuelwood (ktoe)', data: data.map(d=>d.fw), borderColor:'#8b5a2b', backgroundColor:'rgba(139,90,43,0.10)', fill:true, tension:0.35, yAxisID:'y', pointRadius:3, borderWidth:2.5 },
+      { label:'Electricity comm. (ktoe)', data: data.map(d=>d.elecC), borderColor:PALETTE.teal, backgroundColor:PALETTE.tealPale, fill:true, tension:0.35, yAxisID:'y2', pointRadius:3, borderWidth:2.5 }
+    ]},
+    options: opts
+  });
+}
+
+// Energy donut - year picker
+let donutChart = null;
+function buildDonut(yearIdx) {
+  const d = RAW[yearIdx];
+  const ctx = document.getElementById('chart-energy-donut').getContext('2d');
+  if (donutChart) donutChart.destroy();
+  if (!d.fw) { ctx.clearRect(0,0,400,400); return; }
+  const vals = [d.fw, d.ar, d.ad_, d.coal, d.oil, d.elecC, d.renew];
+  const names = ['Fuelwood','Agri. Residue','Animal Dung','Coal','Oil','Electricity','Renewable'];
+  const colors = ['#8b5a2b','#c9a55a','#d4b896','#555','#c0392b',PALETTE.teal,'#27ae60'];
+  const total = vals.reduce((a,b)=>a+(b||0),0);
+  donutChart = new Chart(ctx, {
+    type:'doughnut',
+    data: { labels: names, datasets:[{ data:vals, backgroundColor:colors, borderColor:'white', borderWidth:2, hoverOffset:12 }]},
+    options: {
+      responsive:true, maintainAspectRatio:true, cutout:'55%', animation:{duration:500},
+      plugins: {
+        legend:{ position:'right', labels:{font:baseFont, color:'#3d5260', boxWidth:12, padding:8}},
+        tooltip:{ backgroundColor:'rgba(10,61,71,0.95)', bodyFont:baseFont, padding:10, cornerRadius:8,
+          callbacks:{ label: (item) => {
+            const pct = ((item.raw/total)*100).toFixed(1);
+            return ` ${item.label}: ${item.raw.toFixed(0)} ktoe (${pct}%)`;
+          }}}
+      }
+    }
+  });
+}
+
+function buildAccess() {
+  const data = fd().filter(d => d.access !== null || d.pcElec !== null);
+  const allData = fd();
+  const ctx = document.getElementById('chart-access').getContext('2d');
+  if (charts['access']) charts['access'].destroy();
+  const accessData = allData.map(d => d.access);
+  const elecData = allData.map(d => d.pcElec);
+  const opts = commonOpts({ scales: {
+    x: { ticks:{...baseTick,maxRotation:45}, grid:{color:'#e8ecf0'} },
+    y: { type:'linear', position:'left', title:{display:true,text:'Electricity Access (%)',font:baseFont,color:PALETTE.green}, ticks:{...baseTick,color:PALETTE.green}, grid:{color:'#e8ecf0'}, min:50, max:105 },
+    y2: { type:'linear', position:'right', title:{display:true,text:'Per Capita kWh',font:baseFont,color:PALETTE.teal}, ticks:{...baseTick,color:PALETTE.teal}, grid:{drawOnChartArea:false} }
+  }});
+  opts.plugins.annotation.annotations = shockAnnotations(allData);
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(allData[items[0].dataIndex]);
+  charts['access'] = new Chart(ctx, {
+    type:'line',
+    data: { labels: labels(allData), datasets: [
+      { label:'Electricity Access (%)', data: accessData, borderColor: PALETTE.green, backgroundColor:'rgba(39,174,96,0.12)', fill:true, tension:0.35, yAxisID:'y', pointRadius:3, borderWidth:2.5, spanGaps:false },
+      { label:'Per Capita Electricity (kWh)', data: elecData, borderColor: PALETTE.teal, backgroundColor: PALETTE.tealPale, fill:true, tension:0.35, yAxisID:'y2', pointRadius:3, borderWidth:2.5, spanGaps:false }
+    ]},
+    options: opts
+  });
+}
+
+function buildElecSector() {
+  const data = fd().filter(d => d.hhGwh !== null);
+  const ctx = document.getElementById('chart-elec-sector').getContext('2d');
+  if (charts['elecsec']) charts['elecsec'].destroy();
+  const showHH = document.getElementById('togHH').checked;
+  const showInd = document.getElementById('togInd').checked;
+  const showSrv = document.getElementById('togSrv').checked;
+  const showExp = document.getElementById('togExp').checked;
+  const showOth = document.getElementById('togOth').checked;
+  const ann = {};
+  data.forEach((d,i)=>{
+    const gi = RAW.indexOf(d);
+    if (showEQ && gi===EQ_IDX) ann['eq']={type:'line',xMin:i,xMax:i,borderColor:PALETTE.red,borderWidth:2,borderDash:[6,3],label:{content:'🔴 EQ',display:true,position:'start',backgroundColor:PALETTE.red,color:'white',font:{size:9},padding:3}};
+    if (showCovid && (gi===COV1_IDX||gi===COV2_IDX)) ann[`cv${i}`]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(231,76,60,0.10)',borderColor:'rgba(231,76,60,0.3)',borderWidth:1};
+  });
+  const opts = commonOpts({ scales: {
+    x: { stacked:true, ticks:{...baseTick,maxRotation:45}, grid:{color:'#e8ecf0'} },
+    y: { stacked:true, title:{display:true,text:'GWh',font:baseFont,color:PALETTE.teal}, ticks:baseTick, grid:{color:'#e8ecf0'} }
+  }});
+  opts.plugins.annotation.annotations = ann;
+  opts.plugins.tooltip.callbacks.title = (items) => dualLabel(data[items[0].dataIndex]);
+  const datasets = [];
+  if (showHH) datasets.push({ label:'Household', data:data.map(d=>d.hhGwh), backgroundColor:'rgba(13,79,92,0.75)', borderRadius:0 });
+  if (showInd) datasets.push({ label:'Industry', data:data.map(d=>d.indGwh), backgroundColor:'rgba(232,160,32,0.80)', borderRadius:0 });
+  if (showSrv) datasets.push({ label:'Services', data:data.map(d=>d.srvGwh), backgroundColor:'rgba(39,174,96,0.75)', borderRadius:0 });
+  if (showExp) datasets.push({ label:'Export', data:data.map(d=>d.expGwh), backgroundColor:'rgba(52,152,219,0.80)', borderRadius:0 });
+  if (showOth) datasets.push({ label:'Others', data:data.map(d=>d.othGwh), backgroundColor:'rgba(149,165,166,0.80)', borderRadius:0 });
+  charts['elecsec'] = new Chart(ctx, {
+    type:'bar', data:{ labels:data.map(d=>d.ad), datasets },
+    options: opts
+  });
+}
+
+function buildSparklines() {
+  ['spark1','spark2','spark3'].forEach(id => { if (charts[id]) charts[id].destroy(); });
+  const sparkOpts = (color) => ({
+    responsive:true, maintainAspectRatio:true, animation:{duration:400},
+    plugins:{ legend:{display:false}, tooltip:{enabled:false}, annotation:{} },
+    scales:{ x:{display:false}, y:{display:false} },
+    elements:{ point:{radius:0}, line:{tension:0.4, borderWidth:2.5} }
+  });
+
+  const allData = RAW;
+  charts['spark1'] = new Chart(document.getElementById('spark1').getContext('2d'), {
+    type:'line', data:{ labels:allData.map(d=>d.ad), datasets:[{ data:allData.map(d=>d.pcgdp), borderColor:PALETTE.teal, backgroundColor:PALETTE.tealPale, fill:true }]},
+    options: sparkOpts(PALETTE.teal)
+  });
+  charts['spark2'] = new Chart(document.getElementById('spark2').getContext('2d'), {
+    type:'line', data:{ labels:allData.map(d=>d.ad), datasets:[{ data:allData.map(d=>d.pcElec), borderColor:PALETTE.amber, backgroundColor:PALETTE.amberPale, fill:true, spanGaps:false }]},
+    options: sparkOpts(PALETTE.amber)
+  });
+  charts['spark3'] = new Chart(document.getElementById('spark3').getContext('2d'), {
+    type:'line', data:{ labels:allData.map(d=>d.ad), datasets:[{ data:allData.map(d=>d.pcEnergy), borderColor:PALETTE.green, backgroundColor:PALETTE.greenPale, fill:true, spanGaps:false }]},
+    options: sparkOpts(PALETTE.green)
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ACTIVE SECTION CHARTS ONLY
+// ══════════════════════════════════════════════════════════════════
+function getActiveSection() {
+  return document.querySelector('.section.active')?.id;
+}
+
+function rebuildActiveCharts() {
+  const sec = getActiveSection();
+  if (sec==='s1') { buildGDP(); buildPCGDP(); buildPop(); updateKPIs(); }
+  if (sec==='s2') { buildTrade(); buildDeficit(); buildXRate(); }
+  if (sec==='s3') { buildSectors(); buildSrvInd(); }
+  if (sec==='s4') { buildEnergyStack(); buildFWElec(); }
+  if (sec==='s5') { buildAccess(); buildElecSector(); buildSparklines(); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// KPI UPDATES
+// ══════════════════════════════════════════════════════════════════
+function updateKPIs() {
+  const latest = fd()[fd().length-1];
+  const first = fd()[0];
+  document.getElementById('kpi-gdp').textContent = latest.gdp.toLocaleString('en',{maximumFractionDigits:1});
+  document.getElementById('kpi-pop').textContent = latest.pop.toFixed(1);
+  document.getElementById('kpi-pcgdp').textContent = latest.pcgdp.toFixed(1);
+  document.getElementById('kpi-xrate').textContent = latest.xrate.toFixed(1);
+  const gdpChg = ((latest.gdp/first.gdp-1)*100).toFixed(1);
+  document.getElementById('kpi-gdp-chg').textContent = `↑ +${gdpChg}% since ${first.ad}`;
+  const popChg = ((latest.pop/first.pop-1)*100).toFixed(1);
+  document.getElementById('kpi-pop-chg').textContent = `↑ +${popChg}% since ${first.ad}`;
+  const pcChg = ((latest.pcgdp/first.pcgdp-1)*100).toFixed(1);
+  document.getElementById('kpi-pcgdp-chg').textContent = `↑ +${pcChg}% since ${first.ad}`;
+  const xrChg = ((latest.xrate/first.xrate-1)*100).toFixed(1);
+  document.getElementById('kpi-xrate-chg').textContent = `↑ Depreciated +${xrChg}% since ${first.ad}`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// POPULATE SELECTORS
+// ══════════════════════════════════════════════════════════════════
+function populateGlobalYears() {
+  const s = document.getElementById('yearStart');
+  const e = document.getElementById('yearEnd');
+  s.innerHTML = ''; e.innerHTML = '';
+  RAW.forEach((d,i) => {
+    s.innerHTML += `<option value="${i}" ${i===0?'selected':''}>${d.bs} | ${d.ad}</option>`;
+    e.innerHTML += `<option value="${i}" ${i===RAW.length-1?'selected':''}>${d.bs} | ${d.ad}</option>`;
+  });
+}
+
+function populateSrvYear() {
+  const sel = document.getElementById('srvYear');
+  sel.innerHTML = '';
+  RAW.forEach((d,i) => { sel.innerHTML += `<option value="${i}" ${i===RAW.length-1?'selected':''}>${d.bs} | ${d.ad}</option>`; });
+  sel.addEventListener('change', () => buildSubsector(+sel.value));
+}
+
+function populateEnergyYear() {
+  const sel = document.getElementById('energyYear');
+  sel.innerHTML = '';
+  const energyYears = RAW.filter(d=>d.fw!==null);
+  energyYears.forEach(d => {
+    const i = RAW.indexOf(d);
+    sel.innerHTML += `<option value="${i}" ${i===12?'selected':''}>${d.bs} | ${d.ad}</option>`;
+  });
+  sel.addEventListener('change', () => buildDonut(+sel.value));
+}
+
+// ══════════════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ══════════════════════════════════════════════════════════════════
+document.getElementById('yearStart').addEventListener('change', function() {
+  startIdx = Math.min(+this.value, endIdx);
+  rebuildActiveCharts();
+});
+document.getElementById('yearEnd').addEventListener('change', function() {
+  endIdx = Math.max(+this.value, startIdx);
+  rebuildActiveCharts();
+});
+document.getElementById('toggleEQ').addEventListener('change', function() {
+  showEQ = this.checked; rebuildActiveCharts();
+});
+document.getElementById('toggleCovid').addEventListener('change', function() {
+  showCovid = this.checked; rebuildActiveCharts();
+});
+
+// Sector toggles
+['togHH','togInd','togSrv','togExp','togOth'].forEach(id => {
+  document.getElementById(id).addEventListener('change', buildElecSector);
+});
+
+// NAV TABS
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById(this.dataset.section).classList.add('active');
+    // Build section-specific subsector/donut on first show
+    setTimeout(() => {
+      rebuildActiveCharts();
+      const sec = this.dataset.section;
+      if (sec==='s3') buildSubsector(+document.getElementById('srvYear').value);
+      if (sec==='s4') buildDonut(+document.getElementById('energyYear').value);
+    }, 50);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+populateGlobalYears();
+populateSrvYear();
+populateEnergyYear();
+buildGDP(); buildPCGDP(); buildPop(); updateKPIs();
+// Pre-init section charts (hidden, built on first tab click)
+</script>
+</body>
+</html>

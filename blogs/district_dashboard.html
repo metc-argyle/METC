@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepal Census 2021 — Housing & Population Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap');
+
+  :root {
+    --crimson: #C0392B;
+    --deep-red: #8B1A1A;
+    --gold: #D4A017;
+    --amber: #E67E22;
+    --teal: #1A7A7A;
+    --teal-light: #27AE8F;
+    --navy: #1B2A4A;
+    --slate: #2C3E50;
+    --fog: #F4F1EC;
+    --white: #FEFEFE;
+    --ink: #1A1A2E;
+    --muted: #7F8C8D;
+    --border: #D5CCB8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--fog);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--deep-red) 55%, var(--crimson) 100%);
+    color: white;
+    padding: 2.5rem 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 400px; height: 200px;
+    border-radius: 50%;
+    background: rgba(212,160,23,0.08);
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(212,160,23,0.2);
+    border: 1px solid rgba(212,160,23,0.5);
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2px;
+    margin-bottom: 0.75rem;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.8rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  header h1 span { color: var(--gold); }
+  header p {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    opacity: 0.75;
+    font-weight: 300;
+    max-width: 600px;
+  }
+  .header-meta {
+    margin-top: 1.2rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .header-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .header-stat .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+  }
+  .header-stat .lbl {
+    font-size: 0.72rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.15rem;
+  }
+  .divider-line {
+    width: 1px; height: 40px;
+    background: rgba(255,255,255,0.2);
+    align-self: center;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: var(--navy);
+    display: flex;
+    padding: 0 2rem;
+    overflow-x: auto;
+    gap: 0;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 0.9rem 1.3rem;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.85); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    padding: 2rem 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* KPI ROW */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .kpi-card {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    border-left: 4px solid var(--crimson);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); }
+  .kpi-card.teal { border-left-color: var(--teal); }
+  .kpi-card.amber { border-left-color: var(--amber); }
+  .kpi-card.navy { border-left-color: var(--navy); }
+  .kpi-card.gold { border-left-color: var(--gold); }
+  .kpi-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .kpi-lbl {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: 0.4rem;
+    font-weight: 600;
+  }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
+  }
+
+  /* CHART CARD */
+  .chart-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .chart-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+  .chart-card .subtitle {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  .canvas-wrap {
+    position: relative;
+  }
+
+  /* POLICY CALLOUTS */
+  .policy-box {
+    background: linear-gradient(135deg, var(--navy) 0%, #243B6E 100%);
+    border-radius: 8px;
+    padding: 1.4rem 1.6rem;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+  .policy-box h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .policy-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .policy-box ul li {
+    font-size: 0.82rem;
+    opacity: 0.88;
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.45;
+  }
+  .policy-box ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+
+  /* ALERT BOXES */
+  .alert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .alert-card {
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .alert-card.red { background: #FEF0EE; border: 1px solid #F5B8B2; }
+  .alert-card.green { background: #EEF8F4; border: 1px solid #A8DEC8; }
+  .alert-card.yellow { background: #FEF9EC; border: 1px solid #F5DEAD; }
+  .alert-card .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .alert-card .text strong {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 0.2rem;
+  }
+  .alert-card .text span { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+  /* DISTRICT TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .data-table th {
+    background: var(--navy);
+    color: white;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .data-table td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--slate);
+  }
+  .data-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+  .data-table tr:hover td { background: rgba(26,122,122,0.05); }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-mountain { background: #EBF5FB; color: #1A5276; }
+  .badge-hill { background: #EAFAF1; color: #1D6A39; }
+  .badge-tarai { background: #FEF9E7; color: #7D6608; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom: 0.75rem; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: var(--slate);
+  }
+  .progress-bar-bg {
+    background: #EEE;
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  /* SECTION HEADER */
+  .section-hdr {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-hdr h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .section-hdr .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    background: rgba(192,57,43,0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-badge">National Statistical Office · NSO Nepal</div>
+  <h1>Nepal Housing & Population<br><span>Census Dashboard 2021</span></h1>
+  <p>An interactive policy overview of population distribution, household structure, energy access, and housing quality across Nepal's 77 districts.</p>
+  <div class="header-meta">
+    <div class="header-stat">
+      <span class="val">29.2M</span>
+      <span class="lbl">Total Population</span>
+    </div>
+    <div class="divider-line"></div>
+    <div class="header-stat">
+      <span class="val">6.67M</span>
+      <span class="lbl">Households</span>
+    </div>
+    <div class="divider-line"></div>
+    <div class="header-stat">
+      <span class="val">77</span>
+      <span class="lbl">Districts</span>
+    </div>
+    <div class="divider-line"></div>
+    <div class="header-stat">
+      <span class="val">7</span>
+      <span class="lbl">Provinces</span>
+    </div>
+    <div class="divider-line"></div>
+    <div class="header-stat">
+      <span class="val">65%</span>
+      <span class="lbl">Urban Share</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="showSection('overview')">Overview</button>
+  <button class="tab-btn" onclick="showSection('population')">Population</button>
+  <button class="tab-btn" onclick="showSection('housing')">Housing Quality</button>
+  <button class="tab-btn" onclick="showSection('energy')">Energy Access</button>
+  <button class="tab-btn" onclick="showSection('assets')">Household Assets</button>
+  <button class="tab-btn" onclick="showSection('districts')">District Explorer</button>
+</nav>
+
+<main>
+
+<!-- ===== OVERVIEW ===== -->
+<section id="overview" class="section active">
+  <div class="section-hdr">
+    <h2>National Snapshot</h2>
+    <span class="tag">NHPC 2021</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val">65.0%</div><div class="kpi-lbl">Urban Population</div></div>
+    <div class="kpi-card teal"><div class="kpi-val">53.4%</div><div class="kpi-lbl">Tarai Region Share</div></div>
+    <div class="kpi-card amber"><div class="kpi-val">4.37</div><div class="kpi-lbl">Avg Household Size</div></div>
+    <div class="kpi-card navy"><div class="kpi-val">92.2%</div><div class="kpi-lbl">Grid Electricity Access</div></div>
+    <div class="kpi-card gold"><div class="kpi-val">51.0%</div><div class="kpi-lbl">Use Fuelwood to Cook</div></div>
+    <div class="kpi-card"><div class="kpi-val">44.3%</div><div class="kpi-lbl">Use LPG to Cook</div></div>
+  </div>
+
+  <div class="alert-grid">
+    <div class="alert-card red">
+      <span class="icon">🔥</span>
+      <div class="text"><strong>Energy Poverty Gap</strong><span>Karnali has 82% fuelwood dependency — the highest province. Humla district reaches 98.5%.</span></div>
+    </div>
+    <div class="alert-card yellow">
+      <span class="icon">🏠</span>
+      <div class="text"><strong>Informal Housing</strong><span>30.7% of households nationally have mud-bonded brick walls. Karnali stands at 80%.</span></div>
+    </div>
+    <div class="alert-card green">
+      <span class="icon">💡</span>
+      <div class="text"><strong>Electrification Progress</strong><span>92.2% of households access grid electricity — a major leap from 2011 Census figures.</span></div>
+    </div>
+    <div class="alert-card yellow">
+      <span class="icon">👨‍👩‍👧</span>
+      <div class="text"><strong>Large Households in Madhesh</strong><span>Madhesh Tarai districts average 5.1–5.9 persons per household — straining services.</span></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Population by Province</h3>
+      <div class="subtitle">Total population in thousands (NHPC 2021)</div>
+      <div class="canvas-wrap"><canvas id="provPopChart" height="240"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Population by Ecological Region</h3>
+      <div class="subtitle">Mountain · Hill · Tarai distribution</div>
+      <div class="canvas-wrap"><canvas id="ecoRegionChart" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Urban vs Rural Population Split</h3>
+      <div class="subtitle">By province — showing urbanization gradient</div>
+      <div class="canvas-wrap"><canvas id="urbanRuralChart" height="240"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>National Cooking Fuel Mix</h3>
+      <div class="subtitle">Weighted average across all households</div>
+      <div class="canvas-wrap"><canvas id="cookNationalChart" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <div class="policy-box">
+    <h4>📋 Key Policy Takeaways — Overview</h4>
+    <ul>
+      <li>Nepal's population is 65% urban but growth is heavily concentrated in Bagmati (Kathmandu Valley) and Madhesh, creating infrastructure pressure.</li>
+      <li>The Tarai (plains) hosts 53% of the population but spans only a narrow geographic strip — urban planning and flood resilience are critical priorities.</li>
+      <li>Despite 92% grid electricity access, over half of households still cook with fuelwood — indicating an urgent clean cooking transition is needed beyond electrification.</li>
+      <li>Karnali Province is an outlier on nearly every development indicator: highest fuelwood use, highest solar dependency, lowest cement housing quality, lowest household assets.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== POPULATION ===== -->
+<section id="population" class="section">
+  <div class="section-hdr">
+    <h2>Population & Household Distribution</h2>
+    <span class="tag">Demographics</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val">15.6M</div><div class="kpi-lbl">Tarai Population</div></div>
+    <div class="kpi-card teal"><div class="kpi-val">11.6M</div><div class="kpi-lbl">Hill Population</div></div>
+    <div class="kpi-card amber"><div class="kpi-val">1.77M</div><div class="kpi-lbl">Mountain Population</div></div>
+    <div class="kpi-card navy"><div class="kpi-val">4.79</div><div class="kpi-lbl">Tarai HH Size</div></div>
+    <div class="kpi-card gold"><div class="kpi-val">4.42</div><div class="kpi-lbl">Mountain HH Size</div></div>
+    <div class="kpi-card"><div class="kpi-val">4.08</div><div class="kpi-lbl">Hill HH Size</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Household Count by Province</h3>
+      <div class="subtitle">Urban vs Rural households (thousands)</div>
+      <div class="canvas-wrap"><canvas id="hhProvinceChart" height="260"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Average Household Size by Province</h3>
+      <div class="subtitle">Persons per household — larger = more dependents per unit</div>
+      <div class="canvas-wrap"><canvas id="hhSizeChart" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Population Density by Region Type</h3>
+      <div class="subtitle">Share of national population vs ecological zone</div>
+      <div class="canvas-wrap"><canvas id="densityChart" height="220"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Urbanization Rate by Province</h3>
+      <div class="subtitle">% of provincial population classified urban</div>
+      <div class="canvas-wrap"><canvas id="urbanRateChart" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <div class="policy-box">
+    <h4>📋 Key Policy Takeaways — Population</h4>
+    <ul>
+      <li>Madhesh province has the largest average household sizes (5.1–5.9), suggesting higher fertility rates and need for targeted family planning, maternal health, and school infrastructure investment.</li>
+      <li>Karnali and Sudurpachim have the lowest populations but the most challenging topography — per-capita infrastructure investment must be higher to ensure equity.</li>
+      <li>Bagmati's household count (1.57M) is disproportionately large relative to territory, reflecting rapid urban in-migration. Rental housing policy and urban land management are urgent priorities.</li>
+      <li>Mountain districts show institutional population as a notable share — driven by army/police outposts — a factor in service planning.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== HOUSING ===== -->
+<section id="housing" class="section">
+  <div class="section-hdr">
+    <h2>Housing Quality & Construction</h2>
+    <span class="tag">Infrastructure</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val">52.2%</div><div class="kpi-lbl">Cement Brick Walls</div></div>
+    <div class="kpi-card teal"><div class="kpi-val">30.7%</div><div class="kpi-lbl">Mud Brick Walls</div></div>
+    <div class="kpi-card amber"><div class="kpi-val">74.3%</div><div class="kpi-lbl">Bagmati Cement Walls</div></div>
+    <div class="kpi-card navy"><div class="kpi-val">80.3%</div><div class="kpi-lbl">Karnali Mud Walls</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Wall Material: Mud vs Cement by Province</h3>
+      <div class="subtitle">% of households — indicator of structural quality & seismic resilience</div>
+      <div class="canvas-wrap"><canvas id="wallChart" height="280"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Roof Material by Province</h3>
+      <div class="subtitle">Cement & tile roofing — proxy for durable construction</div>
+      <div class="canvas-wrap"><canvas id="roofChart" height="280"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:1.5rem">
+    <h3>Provincial Housing Quality Index</h3>
+    <div class="subtitle">Cement wall share — higher = better structural quality</div>
+    <div id="housingProgressBars" style="margin-top:1rem;"></div>
+  </div>
+
+  <div class="policy-box">
+    <h4>📋 Key Policy Takeaways — Housing</h4>
+    <ul>
+      <li>Karnali Province has 80% mud-bonded walls — the highest nationally — creating severe seismic vulnerability. Post-2015 earthquake reconstruction investment has yet to fully reach these areas.</li>
+      <li>Sudurpachim (47% mud) and Madhesh (10% mud, high cement) present a contrasting picture: Madhesh has better wall quality but structurally dense neighborhoods with poor sanitation access.</li>
+      <li>Bagmati's 74% cement wall share reflects valley urbanization but also creates risks of unregulated vertical construction without proper planning codes.</li>
+      <li>Cement roof share in Madhesh Tarai districts is 25–47%, indicating high metal sheet use — poor insulation leading to heat stress and energy poverty in a hot climate.</li>
+      <li>Safe housing standards and subsidized construction materials should be prioritized for Karnali and Sudurpachim — both remote and high-risk zones.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== ENERGY ===== -->
+<section id="energy" class="section">
+  <div class="section-hdr">
+    <h2>Energy Access & Cooking Fuels</h2>
+    <span class="tag">Clean Energy</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val">92.2%</div><div class="kpi-lbl">Grid Electricity</div></div>
+    <div class="kpi-card teal"><div class="kpi-val">6.6%</div><div class="kpi-lbl">Solar Lighting</div></div>
+    <div class="kpi-card amber"><div class="kpi-val">44.3%</div><div class="kpi-lbl">LPG Cooking</div></div>
+    <div class="kpi-card navy"><div class="kpi-val">51.0%</div><div class="kpi-lbl">Fuelwood Cooking</div></div>
+    <div class="kpi-card gold"><div class="kpi-val">1.18%</div><div class="kpi-lbl">Biogas Cooking</div></div>
+    <div class="kpi-card"><div class="kpi-val">47.9%</div><div class="kpi-lbl">Karnali Solar</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Cooking Fuel Mix by Province</h3>
+      <div class="subtitle">Fuelwood vs LPG vs other fuels — stacked by % of households</div>
+      <div class="canvas-wrap"><canvas id="cookingChart" height="290"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Lighting Source by Province</h3>
+      <div class="subtitle">Grid electricity vs solar vs kerosene — access gap visible in Karnali</div>
+      <div class="canvas-wrap"><canvas id="lightingChart" height="290"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>Fuelwood Dependency: Top 10 Districts</h3>
+      <div class="subtitle">% of households using fuelwood as primary cooking fuel</div>
+      <div class="canvas-wrap"><canvas id="fuelwoodTop10" height="250"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>LPG Adoption: Top 10 Districts</h3>
+      <div class="subtitle">% of households using LPG — concentrated in urban centers</div>
+      <div class="canvas-wrap"><canvas id="lpgTop10" height="250"></canvas></div>
+    </div>
+  </div>
+
+  <div class="policy-box">
+    <h4>📋 Key Policy Takeaways — Energy</h4>
+    <ul>
+      <li>Nepal's clean cooking transition is far behind electrification: 92% have electricity but only 44% cook with LPG. Indoor air pollution from fuelwood affects millions.</li>
+      <li>Karnali is the standout crisis point — 82% fuelwood, 48% still rely on solar for lighting. Grid extension and clean cooking subsidies must be co-prioritized here.</li>
+      <li>Animal dung cooking is concentrated in Madhesh (10.9%) — particularly Saptari (30.5%) and Siraha (17.9%) — linked to lower incomes and cultural practices. Biogas plants are an appropriate local solution.</li>
+      <li>LPG adoption is highly urbanized: Kathmandu (97%), Bhaktapur (91%), Lalitpur (89%), Kaski (83%). Rural LPG supply chains and cylinder subsidies need strengthening.</li>
+      <li>Biogas potential remains underdeveloped at 1.18% nationally, despite Nepal's agriculture base. Public investment in biogas digesters could create a renewable cooking fuel cluster.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== ASSETS ===== -->
+<section id="assets" class="section">
+  <div class="section-hdr">
+    <h2>Household Asset Ownership</h2>
+    <span class="tag">Living Standards</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val">49.4%</div><div class="kpi-lbl">TV Ownership</div></div>
+    <div class="kpi-card teal"><div class="kpi-val">15.0%</div><div class="kpi-lbl">Computer/Laptop</div></div>
+    <div class="kpi-card amber"><div class="kpi-val">27.3%</div><div class="kpi-lbl">Motorcycle</div></div>
+    <div class="kpi-card navy"><div class="kpi-val">35.2%</div><div class="kpi-lbl">Bicycle</div></div>
+    <div class="kpi-card gold"><div class="kpi-val">53.1%</div><div class="kpi-lbl">Fan</div></div>
+    <div class="kpi-card"><div class="kpi-val">23.7%</div><div class="kpi-lbl">Refrigerator</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <h3>National Asset Ownership Rates</h3>
+      <div class="subtitle">% of households owning each asset — national weighted average</div>
+      <div class="canvas-wrap"><canvas id="assetNationalChart" height="260"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Asset Ownership by Province</h3>
+      <div class="subtitle">TV, computer & refrigerator as proxy for household prosperity</div>
+      <div class="canvas-wrap"><canvas id="assetProvinceChart" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:1.5rem">
+    <h3>Digital Access Gap: Computer Ownership by Province</h3>
+    <div class="subtitle">% of households owning a computer or laptop</div>
+    <div id="computerBars" style="margin-top:1rem;"></div>
+  </div>
+
+  <div class="policy-box">
+    <h4>📋 Key Policy Takeaways — Assets</h4>
+    <ul>
+      <li>The digital divide is stark: Kathmandu Valley averages 45–49% computer ownership vs Karnali at 2–4%. Remote education and digital economy access require targeted hardware subsidies and connectivity investment.</li>
+      <li>Fan ownership correlates strongly with heat exposure — Jhapa (85%), Morang (82%) and Sarlahi (74%) have high fan usage reflecting climate stress in Tarai. Air conditioning remains below 1% nationally, but will rise with income growth.</li>
+      <li>Motorcycle ownership is highest in Tarai districts (30–43%) indicating the key role of two-wheelers in last-mile connectivity — electrification of motorcycles is a tractable rural clean transport policy.</li>
+      <li>Refrigerator penetration at 23.7% nationally suggests cold chain infrastructure is inadequate for rural food security and vaccine delivery.</li>
+      <li>Washing machine ownership is below 5% — but concentrated in Kathmandu Valley (14–18%), showing income inequality in domestic appliance access.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== DISTRICTS ===== -->
+<section id="districts" class="section">
+  <div class="section-hdr">
+    <h2>District Explorer</h2>
+    <span class="tag">77 Districts</span>
+  </div>
+
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.2rem; align-items:center;">
+    <select id="filterProvince" onchange="filterTable()" style="padding:0.5rem 0.9rem;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:0.83rem;background:white;color:var(--slate);">
+      <option value="">All Provinces</option>
+      <option>Bagmati</option><option>Gandaki</option><option>Karnali</option>
+      <option>Koshi</option><option>Lumbini</option><option>Madhesh</option><option>Sudurpachim</option>
+    </select>
+    <select id="filterRegion" onchange="filterTable()" style="padding:0.5rem 0.9rem;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:0.83rem;background:white;color:var(--slate);">
+      <option value="">All Regions</option>
+      <option>Mountain</option><option>Hill</option><option>Tarai</option>
+    </select>
+    <select id="sortCol" onchange="filterTable()" style="padding:0.5rem 0.9rem;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:0.83rem;background:white;color:var(--slate);">
+      <option value="pop">Sort by Population</option>
+      <option value="lpg">Sort by LPG Use</option>
+      <option value="fuelwood">Sort by Fuelwood Use</option>
+      <option value="cement">Sort by Cement Wall</option>
+      <option value="grid">Sort by Grid Electricity</option>
+    </select>
+    <span id="tableCount" style="font-size:0.78rem;color:var(--muted);margin-left:auto;"></span>
+  </div>
+
+  <div class="chart-card" style="overflow:auto;">
+    <table class="data-table" id="districtTable">
+      <thead>
+        <tr>
+          <th>District</th><th>Province</th><th>Region</th>
+          <th>Pop (K)</th><th>Urban %</th><th>HH Size</th>
+          <th>LPG Cook %</th><th>Fuelwood %</th>
+          <th>Grid Elec %</th><th>Cement Wall %</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Data source: National Housing and Population Census (NHPC) 2021 · National Statistical Office (NSO), Nepal &nbsp;|&nbsp;
+  Dashboard built for policy analysis — values in thousands unless noted &nbsp;|&nbsp;
+  All figures represent district-level data aggregated from 77 districts across 7 provinces
+</footer>
+
+<script>
+// ===== DATA =====
+const districtData = [
+  {district:"Taplejung",province:"Koshi",region:"Mountain",pop:120.59,urban:23.6,hhSize:4.34,lpg:10.82,fuelwood:88.67,grid:86.62,cement:7.45},
+  {district:"Sangkhuwasabha",province:"Koshi",region:"Mountain",pop:158.04,urban:68.4,hhSize:4.03,lpg:15.10,fuelwood:84.16,grid:87.06,cement:7.19},
+  {district:"Solukhumbu",province:"Koshi",region:"Mountain",pop:104.85,urban:24.5,hhSize:3.98,lpg:15.03,fuelwood:83.03,grid:94.98,cement:6.64},
+  {district:"Okhaldhunga",province:"Koshi",region:"Hill",pop:139.55,urban:19.6,hhSize:4.07,lpg:7.94,fuelwood:91.25,grid:75.90,cement:7.26},
+  {district:"Khotang",province:"Koshi",region:"Hill",pop:175.30,urban:40.0,hhSize:4.20,lpg:8.03,fuelwood:91.16,grid:83.60,cement:4.28},
+  {district:"Bhojpur",province:"Koshi",region:"Hill",pop:157.92,urban:35.0,hhSize:4.09,lpg:7.35,fuelwood:92.30,grid:70.21,cement:2.90},
+  {district:"Dhankuta",province:"Koshi",region:"Hill",pop:150.60,urban:51.3,hhSize:4.00,lpg:26.03,fuelwood:73.40,grid:97.29,cement:17.90},
+  {district:"Terhathum",province:"Koshi",region:"Hill",pop:88.73,urban:38.4,hhSize:4.06,lpg:13.81,fuelwood:85.64,grid:95.72,cement:5.93},
+  {district:"Panchathar",province:"Koshi",region:"Hill",pop:172.40,urban:28.1,hhSize:4.06,lpg:13.39,fuelwood:85.90,grid:86.56,cement:9.92},
+  {district:"Ilam",province:"Koshi",region:"Hill",pop:279.53,urban:59.6,hhSize:3.96,lpg:20.18,fuelwood:78.27,grid:94.13,cement:21.79},
+  {district:"Jhapa",province:"Koshi",region:"Tarai",pop:998.05,urban:70.0,hhSize:4.07,lpg:62.66,fuelwood:32.47,grid:98.50,cement:67.40},
+  {district:"Morang",province:"Koshi",region:"Tarai",pop:1148.16,urban:69.9,hhSize:4.22,lpg:53.41,fuelwood:37.87,grid:97.54,cement:55.15},
+  {district:"Sunsari",province:"Koshi",region:"Tarai",pop:926.96,urban:71.1,hhSize:4.36,lpg:53.56,fuelwood:34.97,grid:98.42,cement:57.34},
+  {district:"Udayapur",province:"Koshi",region:"Hill",pop:340.72,urban:78.3,hhSize:4.20,lpg:28.58,fuelwood:69.79,grid:84.17,cement:35.57},
+  {district:"Saptari",province:"Madhesh",region:"Tarai",pop:706.26,urban:62.5,hhSize:4.81,lpg:13.00,fuelwood:55.17,grid:98.22,cement:41.37},
+  {district:"Siraha",province:"Madhesh",region:"Tarai",pop:739.95,urban:69.4,hhSize:4.98,lpg:22.34,fuelwood:58.48,grid:98.52,cement:49.15},
+  {district:"Dhanusha",province:"Madhesh",region:"Tarai",pop:867.75,urban:81.8,hhSize:4.90,lpg:37.45,fuelwood:49.47,grid:99.02,cement:54.68},
+  {district:"Mahottari",province:"Madhesh",region:"Tarai",pop:706.99,urban:74.0,hhSize:5.13,lpg:26.99,fuelwood:63.98,grid:98.40,cement:45.55},
+  {district:"Sarlahi",province:"Madhesh",region:"Tarai",pop:862.47,urban:69.1,hhSize:5.23,lpg:27.23,fuelwood:66.57,grid:96.80,cement:42.62},
+  {district:"Rautahat",province:"Madhesh",region:"Tarai",pop:813.57,urban:93.7,hhSize:5.94,lpg:26.18,fuelwood:62.45,grid:97.35,cement:42.78},
+  {district:"Bara",province:"Madhesh",region:"Tarai",pop:763.14,urban:66.5,hhSize:5.81,lpg:34.33,fuelwood:59.93,grid:96.97,cement:52.05},
+  {district:"Parsa",province:"Madhesh",region:"Tarai",pop:654.47,urban:60.4,hhSize:5.79,lpg:44.59,fuelwood:53.22,grid:97.66,cement:54.60},
+  {district:"Dolakha",province:"Bagmati",region:"Mountain",pop:172.77,urban:29.4,hhSize:3.49,lpg:15.76,fuelwood:83.47,grid:98.48,cement:47.44},
+  {district:"Sindhupalchok",province:"Bagmati",region:"Mountain",pop:262.62,urban:41.1,hhSize:3.66,lpg:19.04,fuelwood:80.31,grid:97.61,cement:57.91},
+  {district:"Rasuwa",province:"Bagmati",region:"Mountain",pop:46.69,urban:0.0,hhSize:4.19,lpg:31.60,fuelwood:67.96,grid:97.34,cement:52.52},
+  {district:"Dhading",province:"Bagmati",region:"Hill",pop:325.71,urban:27.0,hhSize:3.89,lpg:36.24,fuelwood:61.88,grid:95.74,cement:55.89},
+  {district:"Nuwakot",province:"Bagmati",region:"Hill",pop:263.39,urban:41.3,hhSize:3.84,lpg:32.58,fuelwood:66.65,grid:98.48,cement:62.28},
+  {district:"Kathmandu",province:"Bagmati",region:"Hill",pop:2041.59,urban:90.3,hhSize:3.75,lpg:97.06,fuelwood:1.89,grid:99.74,cement:92.10},
+  {district:"Bhaktapur",province:"Bagmati",region:"Hill",pop:432.13,urban:98.8,hhSize:3.98,lpg:91.49,fuelwood:7.35,grid:99.04,cement:85.79},
+  {district:"Lalitpur",province:"Bagmati",region:"Hill",pop:551.67,urban:93.3,hhSize:3.93,lpg:88.62,fuelwood:9.74,grid:98.94,cement:83.05},
+  {district:"Kavrepalanchok",province:"Bagmati",region:"Hill",pop:364.04,urban:67.3,hhSize:3.98,lpg:49.08,fuelwood:49.60,grid:96.33,cement:51.02},
+  {district:"Ramechhap",province:"Bagmati",region:"Hill",pop:170.30,urban:38.0,hhSize:3.66,lpg:11.95,fuelwood:87.48,grid:98.38,cement:19.21},
+  {district:"Sindhuli",province:"Bagmati",region:"Hill",pop:300.03,urban:47.1,hhSize:4.33,lpg:27.10,fuelwood:71.90,grid:81.63,cement:40.31},
+  {district:"Makawanpur",province:"Bagmati",region:"Hill",pop:466.07,urban:49.9,hhSize:4.41,lpg:52.11,fuelwood:46.91,grid:93.36,cement:60.62},
+  {district:"Chitwan",province:"Bagmati",region:"Tarai",pop:719.86,urban:94.9,hhSize:4.01,lpg:79.28,fuelwood:18.31,grid:96.23,cement:82.51},
+  {district:"Gorkha",province:"Gandaki",region:"Hill",pop:251.03,urban:35.8,hhSize:3.49,lpg:34.10,fuelwood:63.87,grid:96.71,cement:58.36},
+  {district:"Manang",province:"Gandaki",region:"Mountain",pop:5.66,urban:0.0,hhSize:3.60,lpg:29.35,fuelwood:68.39,grid:86.36,cement:17.19},
+  {district:"Mustang",province:"Gandaki",region:"Mountain",pop:14.45,urban:0.0,hhSize:3.93,lpg:54.10,fuelwood:33.53,grid:77.15,cement:16.69},
+  {district:"Myagdi",province:"Gandaki",region:"Hill",pop:107.03,urban:30.5,hhSize:3.71,lpg:25.67,fuelwood:73.47,grid:95.07,cement:20.47},
+  {district:"Kaski",province:"Gandaki",region:"Hill",pop:600.05,urban:85.6,hhSize:3.74,lpg:83.25,fuelwood:16.07,grid:99.37,cement:83.55},
+  {district:"Lamjung",province:"Gandaki",region:"Hill",pop:155.85,urban:67.2,hhSize:3.53,lpg:45.83,fuelwood:52.10,grid:98.85,cement:47.24},
+  {district:"Tanahun",province:"Gandaki",region:"Hill",pop:321.15,urban:64.3,hhSize:3.63,lpg:53.83,fuelwood:44.60,grid:97.23,cement:58.14},
+  {district:"Nawalparasi East",province:"Gandaki",region:"Tarai",pop:378.08,urban:75.4,hhSize:4.03,lpg:62.83,fuelwood:35.29,grid:95.51,cement:76.39},
+  {district:"Syangja",province:"Gandaki",region:"Hill",pop:253.02,urban:66.7,hhSize:3.67,lpg:32.85,fuelwood:65.72,grid:99.08,cement:39.43},
+  {district:"Parbat",province:"Gandaki",region:"Hill",pop:130.89,urban:44.7,hhSize:3.62,lpg:27.53,fuelwood:72.08,grid:99.02,cement:27.15},
+  {district:"Baglung",province:"Gandaki",region:"Hill",pop:249.21,urban:56.7,hhSize:3.88,lpg:21.58,fuelwood:78.08,grid:97.09,cement:19.00},
+  {district:"Rukum East",province:"Lumbini",region:"Hill",pop:56.79,urban:0.0,hhSize:4.41,lpg:6.45,fuelwood:92.92,grid:88.24,cement:5.20},
+  {district:"Rolpa",province:"Lumbini",region:"Hill",pop:234.79,urban:15.1,hhSize:4.50,lpg:8.15,fuelwood:90.87,grid:72.90,cement:6.75},
+  {district:"Pyuthan",province:"Lumbini",region:"Hill",pop:232.02,urban:32.0,hhSize:4.13,lpg:10.86,fuelwood:88.70,grid:94.40,cement:14.13},
+  {district:"Gulmi",province:"Lumbini",region:"Hill",pop:246.49,urban:24.3,hhSize:3.73,lpg:13.15,fuelwood:86.26,grid:97.57,cement:19.24},
+  {district:"Arghakhanchi",province:"Lumbini",region:"Hill",pop:177.09,urban:61.2,hhSize:3.65,lpg:11.48,fuelwood:88.30,grid:95.65,cement:16.41},
+  {district:"Palpa",province:"Lumbini",region:"Hill",pop:245.03,urban:37.4,hhSize:3.77,lpg:32.93,fuelwood:65.77,grid:92.21,cement:34.67},
+  {district:"Nawalparasi West",province:"Lumbini",region:"Tarai",pop:386.87,urban:55.0,hhSize:4.68,lpg:56.30,fuelwood:41.31,grid:96.75,cement:74.41},
+  {district:"Rupandehi",province:"Lumbini",region:"Tarai",pop:1121.96,urban:58.5,hhSize:4.71,lpg:71.68,fuelwood:22.14,grid:98.09,cement:87.58},
+  {district:"Kapilbastu",province:"Lumbini",region:"Tarai",pop:682.96,urban:70.5,hhSize:5.60,lpg:37.85,fuelwood:51.33,grid:94.98,cement:65.70},
+  {district:"Dang",province:"Lumbini",region:"Tarai",pop:674.99,urban:65.1,hhSize:4.16,lpg:43.57,fuelwood:52.92,grid:92.13,cement:45.85},
+  {district:"Banke",province:"Lumbini",region:"Tarai",pop:603.19,urban:44.1,hhSize:4.66,lpg:52.83,fuelwood:44.93,grid:89.21,cement:63.11},
+  {district:"Bardiya",province:"Lumbini",region:"Tarai",pop:459.90,urban:80.7,hhSize:4.33,lpg:30.61,fuelwood:63.53,grid:95.67,cement:44.28},
+  {district:"Dolpa",province:"Karnali",region:"Mountain",pop:42.77,urban:51.6,hhSize:4.55,lpg:5.94,fuelwood:86.12,grid:58.66,cement:3.96},
+  {district:"Mugu",province:"Karnali",region:"Mountain",pop:64.55,urban:38.0,hhSize:5.19,lpg:9.11,fuelwood:89.56,grid:34.54,cement:5.78},
+  {district:"Humla",province:"Karnali",region:"Mountain",pop:55.39,urban:0.0,hhSize:4.93,lpg:1.19,fuelwood:98.49,grid:56.60,cement:0.82},
+  {district:"Jumla",province:"Karnali",region:"Mountain",pop:118.35,urban:17.8,hhSize:4.84,lpg:9.45,fuelwood:90.18,grid:68.35,cement:7.46},
+  {district:"Kalikot",province:"Karnali",region:"Mountain",pop:145.29,urban:38.5,hhSize:5.43,lpg:7.66,fuelwood:91.47,grid:24.26,cement:6.40},
+  {district:"Dailekh",province:"Karnali",region:"Hill",pop:252.31,urban:48.7,hhSize:4.62,lpg:9.55,fuelwood:89.55,grid:30.09,cement:7.36},
+  {district:"Jajarkot",province:"Karnali",region:"Hill",pop:189.36,urban:55.3,hhSize:5.05,lpg:8.63,fuelwood:90.70,grid:25.29,cement:5.86},
+  {district:"Rukum West",province:"Karnali",region:"Hill",pop:166.74,urban:59.5,hhSize:4.47,lpg:10.93,fuelwood:88.58,grid:65.92,cement:13.78},
+  {district:"Salyan",province:"Karnali",region:"Hill",pop:238.52,urban:42.6,hhSize:4.36,lpg:9.92,fuelwood:89.71,grid:45.32,cement:10.96},
+  {district:"Surkhet",province:"Karnali",region:"Hill",pop:415.13,urban:76.6,hhSize:4.24,lpg:38.44,fuelwood:60.59,grid:68.59,cement:41.81},
+  {district:"Bajura",province:"Sudurpachim",region:"Mountain",pop:138.52,urban:55.2,hhSize:4.94,lpg:7.13,fuelwood:91.83,grid:81.74,cement:6.43},
+  {district:"Bajhang",province:"Sudurpachim",region:"Mountain",pop:189.09,urban:29.5,hhSize:4.97,lpg:6.71,fuelwood:92.89,grid:58.05,cement:17.59},
+  {district:"Darchula",province:"Sudurpachim",region:"Mountain",pop:133.31,urban:34.4,hhSize:4.69,lpg:15.65,fuelwood:84.06,grid:70.55,cement:31.83},
+  {district:"Baitadi",province:"Sudurpachim",region:"Hill",pop:242.16,urban:49.4,hhSize:4.90,lpg:4.62,fuelwood:95.16,grid:49.86,cement:19.86},
+  {district:"Dandeldhura",province:"Sudurpachim",region:"Hill",pop:139.60,urban:42.8,hhSize:4.48,lpg:11.83,fuelwood:87.74,grid:80.19,cement:26.63},
+  {district:"Doti",province:"Sudurpachim",region:"Hill",pop:204.83,urban:31.4,hhSize:4.53,lpg:9.55,fuelwood:89.91,grid:72.57,cement:12.35},
+  {district:"Achham",province:"Sudurpachim",region:"Hill",pop:228.85,urban:43.5,hhSize:4.61,lpg:5.91,fuelwood:93.51,grid:53.33,cement:5.37},
+  {district:"Kailali",province:"Sudurpachim",region:"Tarai",pop:904.67,urban:75.4,hhSize:4.62,lpg:41.24,fuelwood:51.90,grid:94.96,cement:48.68},
+  {district:"Kanchanpur",province:"Sudurpachim",region:"Tarai",pop:513.76,urban:90.3,hhSize:4.62,lpg:41.41,fuelwood:51.68,grid:98.02,cement:59.12},
+];
+
+const PROVINCE_COLORS = {
+  Bagmati: '#C0392B', Gandaki: '#1A7A7A', Karnali: '#D4A017',
+  Koshi: '#1B2A4A', Lumbini: '#27AE8F', Madhesh: '#E67E22', Sudurpachim: '#8E44AD'
+};
+
+const PROV_ORDER = ['Bagmati','Gandaki','Karnali','Koshi','Lumbini','Madhesh','Sudurpachim'];
+
+const provPopData = {
+  Bagmati: {total:6116.9,urban:4507.2,rural:1513.8},
+  Gandaki: {total:2466.4,urban:1601.4,rural:835.1},
+  Karnali: {total:1688.4,urban:869.7,rural:805.5},
+  Koshi:   {total:4961.4,urban:3068.7,rural:1859.4},
+  Lumbini: {total:5122.1,urban:2797.3,rural:2288.0},
+  Madhesh: {total:6114.6,urban:4448.2,rural:1652.5},
+  Sudurpachim:{total:2694.8,urban:1668.0,rural:1010.7}
+};
+
+const provHHData = {
+  Bagmati:{urban:1010.3,rural:560.6},
+  Gandaki:{urban:427.5,rural:235.0},
+  Karnali:{urban:178.6,rural:187.7},
+  Koshi:{urban:654.6,rural:537.0},
+  Lumbini:{urban:599.9,rural:542.0},
+  Madhesh:{urban:741.1,rural:415.6},
+  Sudurpachim:{urban:338.1,rural:239.0}
+};
+
+const cookData = [
+  {p:"Bagmati",fuelwood:28.93,lpg:69.82,elec:0.57,dung:0.01,biogas:0.60},
+  {p:"Gandaki",fuelwood:47.14,lpg:51.54,elec:0.21,dung:0.03,biogas:0.99},
+  {p:"Karnali",fuelwood:82.22,lpg:16.86,elec:0.10,dung:0.14,biogas:0.44},
+  {p:"Koshi",fuelwood:53.39,lpg:41.17,elec:0.52,dung:3.38,biogas:1.32},
+  {p:"Lumbini",fuelwood:53.68,lpg:42.21,elec:0.41,dung:2.08,biogas:1.51},
+  {p:"Madhesh",fuelwood:58.61,lpg:28.71,elec:0.82,dung:10.92,biogas:0.71},
+  {p:"Sudurpachim",fuelwood:70.28,lpg:25.83,elec:0.28,dung:0.08,biogas:3.42}
+];
+
+const lightData = [
+  {p:"Bagmati",grid:97.33,solar:2.33,kerosene:0.14},
+  {p:"Gandaki",grid:97.60,solar:1.91,kerosene:0.23},
+  {p:"Karnali",grid:49.64,solar:47.89,kerosene:0.48},
+  {p:"Koshi",grid:93.69,solar:5.03,kerosene:0.82},
+  {p:"Lumbini",grid:93.67,solar:4.51,kerosene:1.00},
+  {p:"Madhesh",grid:97.90,solar:0.82,kerosene:0.92},
+  {p:"Sudurpachim",grid:81.28,solar:16.30,kerosene:0.29}
+];
+
+const wallData = [
+  {p:"Bagmati",mud:20.15,cement:74.32},
+  {p:"Gandaki",mud:40.91,cement:56.79},
+  {p:"Karnali",mud:80.26,cement:17.20},
+  {p:"Koshi",mud:29.03,cement:42.44},
+  {p:"Lumbini",mud:37.95,cement:53.32},
+  {p:"Madhesh",mud:9.84,cement:47.76},
+  {p:"Sudurpachim",mud:46.79,cement:35.53}
+];
+
+const roofData = {
+  Bagmati:{cement:62.84,tile:0.34},
+  Gandaki:{cement:31.26,tile:0.20},
+  Karnali:{cement:3.85,tile:0.19},
+  Koshi:{cement:19.85,tile:1.53},
+  Lumbini:{cement:51.94,tile:3.23},
+  Madhesh:{cement:36.58,tile:21.13},
+  Sudurpachim:{cement:19.13,tile:4.29}
+};
+
+const assetNational = [
+  {name:'Fan',val:53.1},{name:'TV',val:49.4},{name:'Cycle',val:35.2},
+  {name:'Motorcycle',val:27.3},{name:'Refrigerator',val:23.7},{name:'Computer',val:15.0},
+  {name:'Washing Machine',val:4.2},{name:'Car',val:3.1},{name:'AC',val:0.85}
+];
+
+const assetProv = {
+  Bagmati:{tv:66.5,comp:36.9,fridge:41.2},
+  Gandaki:{tv:59.5,comp:16.4,fridge:27.2},
+  Karnali:{tv:12.7,comp:3.2,fridge:2.1},
+  Koshi:{tv:53.1,comp:12.0,fridge:24.5},
+  Lumbini:{tv:48.5,comp:11.7,fridge:22.5},
+  Madhesh:{tv:44.0,comp:8.1,fridge:11.1},
+  Sudurpachim:{tv:22.3,comp:4.8,fridge:6.8}
+};
+
+const computerProv = [
+  {p:"Bagmati",v:36.9},{p:"Gandaki",v:16.4},{p:"Koshi",v:12.0},
+  {p:"Lumbini",v:11.7},{p:"Madhesh",v:8.1},{p:"Sudurpachim",v:4.8},{p:"Karnali",v:3.2}
+];
+
+// ===== CHART RENDERING =====
+let chartsRendered = {};
+
+function getProvColors(alpha=1) {
+  return PROV_ORDER.map(p => {
+    const c = PROVINCE_COLORS[p];
+    if(alpha===1) return c;
+    const r=parseInt(c.slice(1,3),16), g=parseInt(c.slice(3,5),16), b=parseInt(c.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  });
+}
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, boxWidth: 12 } } },
+  scales: {
+    x: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 10 } } },
+    y: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 10 } } }
+  }
+};
+
+function renderOverviewCharts() {
+  if(chartsRendered['overview']) return;
+  chartsRendered['overview'] = true;
+
+  // Province population
+  new Chart(document.getElementById('provPopChart'), {
+    type:'bar',
+    data: {
+      labels: PROV_ORDER,
+      datasets:[{
+        label:'Total Population (K)',
+        data: PROV_ORDER.map(p=>provPopData[p].total),
+        backgroundColor: getProvColors(0.85),
+        borderColor: getProvColors(),
+        borderWidth: 1.5, borderRadius: 3
+      }]
+    },
+    options: { ...chartDefaults, plugins:{legend:{display:false}},
+      scales:{ x:{ticks:{font:{size:10}}}, y:{ticks:{font:{size:10}}, title:{display:true,text:'Population (thousands)',font:{size:10}}} }
+    }
+  });
+
+  // Eco region donut
+  new Chart(document.getElementById('ecoRegionChart'), {
+    type:'doughnut',
+    data: {
+      labels:['Tarai (Plains)','Hill','Mountain'],
+      datasets:[{data:[15555.1,11619.2,1751.2],
+        backgroundColor:['#D4A017','#1A7A7A','#C0392B'],
+        borderWidth:2, borderColor:'#fff', hoverOffset:8
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{font:{family:"'Source Sans 3'",size:11}}}}
+    }
+  });
+
+  // Urban vs Rural stacked
+  new Chart(document.getElementById('urbanRuralChart'), {
+    type:'bar',
+    data: {
+      labels: PROV_ORDER,
+      datasets:[
+        {label:'Urban',data:PROV_ORDER.map(p=>provPopData[p].urban),backgroundColor:'#1B2A4A',borderRadius:2},
+        {label:'Rural',data:PROV_ORDER.map(p=>provPopData[p].rural),backgroundColor:'#E67E22',borderRadius:2}
+      ]
+    },
+    options: { ...chartDefaults, scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{font:{size:10}}}},
+      plugins:{legend:{position:'bottom', labels:{font:{size:11}}}}
+    }
+  });
+
+  // National cooking donut
+  new Chart(document.getElementById('cookNationalChart'), {
+    type:'doughnut',
+    data: {
+      labels:['Fuelwood','LPG','Animal Dung','Biogas','Electricity','Other'],
+      datasets:[{data:[51.0,44.3,2.87,1.18,0.49,0.16],
+        backgroundColor:['#C0392B','#1A7A7A','#D4A017','#27AE8F','#1B2A4A','#BDC3C7'],
+        borderWidth:2, borderColor:'#fff', hoverOffset:8
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'right', labels:{font:{family:"'Source Sans 3'",size:11}, boxWidth:14}}}
+    }
+  });
+}
+
+function renderPopCharts() {
+  if(chartsRendered['population']) return;
+  chartsRendered['population'] = true;
+
+  new Chart(document.getElementById('hhProvinceChart'), {
+    type:'bar',
+    data: {
+      labels: PROV_ORDER,
+      datasets:[
+        {label:'Urban HH',data:PROV_ORDER.map(p=>provHHData[p].urban),backgroundColor:'#1B2A4A',borderRadius:2},
+        {label:'Rural HH',data:PROV_ORDER.map(p=>provHHData[p].rural),backgroundColor:'#E67E22',borderRadius:2}
+      ]
+    },
+    options: { ...chartDefaults, scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{font:{size:10}},title:{display:true,text:'Households (thousands)',font:{size:10}}}},
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}
+    }
+  });
+
+  // HH size by province (horizontal bar)
+  const hhSizeByProv = {
+    Bagmati:3.75,Gandaki:3.72,Karnali:4.70,Koshi:4.12,
+    Lumbini:4.43,Madhesh:5.21,Sudurpachim:4.69
+  };
+  new Chart(document.getElementById('hhSizeChart'), {
+    type:'bar',
+    data: {
+      labels: PROV_ORDER,
+      datasets:[{
+        label:'Avg Household Size',
+        data: PROV_ORDER.map(p=>hhSizeByProv[p]),
+        backgroundColor: getProvColors(0.8),
+        borderColor: getProvColors(),
+        borderWidth:1.5, borderRadius:3
+      }]
+    },
+    options: { ...chartDefaults, indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{min:3,max:6,ticks:{font:{size:10}},title:{display:true,text:'Persons per household',font:{size:10}}},
+        y:{ticks:{font:{size:10}}}
+      }
+    }
+  });
+
+  // Eco density pie
+  new Chart(document.getElementById('densityChart'), {
+    type:'pie',
+    data:{
+      labels:['Tarai 53.3%','Hill 39.8%','Mountain 6.1%'],
+      datasets:[{data:[53.3,39.8,6.1],backgroundColor:['#D4A017','#1A7A7A','#C0392B'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:"'Source Sans 3'",size:11}}}}}
+  });
+
+  // Urban rate by province
+  const urbanRates = {Bagmati:73.7,Gandaki:64.9,Karnali:51.5,Koshi:61.9,Lumbini:54.6,Madhesh:72.8,Sudurpachim:61.9};
+  new Chart(document.getElementById('urbanRateChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[{
+        label:'Urban %',
+        data:PROV_ORDER.map(p=>urbanRates[p]),
+        backgroundColor:getProvColors(0.8),borderWidth:1.5,borderRadius:3
+      }]
+    },
+    options:{...chartDefaults,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:10}}},y:{min:40,max:80,ticks:{font:{size:10}},title:{display:true,text:'% Urban',font:{size:10}}}}}
+  });
+}
+
+function renderHousingCharts() {
+  if(chartsRendered['housing']) return;
+  chartsRendered['housing'] = true;
+
+  new Chart(document.getElementById('wallChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[
+        {label:'Mud Bonded Wall %',data:PROV_ORDER.map(p=>wallData.find(d=>d.p===p).mud),backgroundColor:'#D4A017',borderRadius:2},
+        {label:'Cement Bonded Wall %',data:PROV_ORDER.map(p=>wallData.find(d=>d.p===p).cement),backgroundColor:'#1A7A7A',borderRadius:2}
+      ]
+    },
+    options:{...chartDefaults,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{max:100,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}}}}
+  });
+
+  new Chart(document.getElementById('roofChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[
+        {label:'Cement Roof %',data:PROV_ORDER.map(p=>roofData[p].cement),backgroundColor:'#1B2A4A',borderRadius:2},
+        {label:'Tile Roof %',data:PROV_ORDER.map(p=>roofData[p].tile),backgroundColor:'#C0392B',borderRadius:2}
+      ]
+    },
+    options:{...chartDefaults,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{max:100,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}}}}
+  });
+
+  // Progress bars
+  const container = document.getElementById('housingProgressBars');
+  const sorted = [...wallData].sort((a,b)=>b.cement-a.cement);
+  sorted.forEach(d => {
+    const color = PROVINCE_COLORS[d.p] || '#1A7A7A';
+    container.innerHTML += `
+      <div class="progress-wrap">
+        <div class="progress-label"><span>${d.p}</span><span>${d.cement.toFixed(1)}%</span></div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:${d.cement}%;background:${color};"></div>
+        </div>
+      </div>`;
+  });
+}
+
+function renderEnergyCharts() {
+  if(chartsRendered['energy']) return;
+  chartsRendered['energy'] = true;
+
+  new Chart(document.getElementById('cookingChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[
+        {label:'Fuelwood',data:PROV_ORDER.map(p=>cookData.find(d=>d.p===p).fuelwood),backgroundColor:'#C0392B',borderRadius:2},
+        {label:'LPG',data:PROV_ORDER.map(p=>cookData.find(d=>d.p===p).lpg),backgroundColor:'#1A7A7A',borderRadius:2},
+        {label:'Animal Dung',data:PROV_ORDER.map(p=>cookData.find(d=>d.p===p).dung),backgroundColor:'#D4A017',borderRadius:2},
+        {label:'Biogas',data:PROV_ORDER.map(p=>cookData.find(d=>d.p===p).biogas),backgroundColor:'#27AE8F',borderRadius:2},
+      ]
+    },
+    options:{...chartDefaults,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,max:100,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}}}}
+  });
+
+  new Chart(document.getElementById('lightingChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[
+        {label:'Grid Electricity',data:PROV_ORDER.map(p=>lightData.find(d=>d.p===p).grid),backgroundColor:'#1B2A4A',borderRadius:2},
+        {label:'Solar',data:PROV_ORDER.map(p=>lightData.find(d=>d.p===p).solar),backgroundColor:'#D4A017',borderRadius:2},
+        {label:'Kerosene',data:PROV_ORDER.map(p=>lightData.find(d=>d.p===p).kerosene),backgroundColor:'#E67E22',borderRadius:2},
+      ]
+    },
+    options:{...chartDefaults,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,max:100,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}}}}
+  });
+
+  // Top 10 fuelwood
+  const fwTop = [...districtData].sort((a,b)=>b.fuelwood-a.fuelwood).slice(0,10);
+  new Chart(document.getElementById('fuelwoodTop10'), {
+    type:'bar',
+    data:{
+      labels:fwTop.map(d=>d.district),
+      datasets:[{label:'Fuelwood %',data:fwTop.map(d=>d.fuelwood),
+        backgroundColor:fwTop.map(d=>PROVINCE_COLORS[d.province]||'#C0392B'),borderRadius:3}]
+    },
+    options:{...chartDefaults,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{min:88,max:100,ticks:{font:{size:10}}},y:{ticks:{font:{size:9}}}}}
+  });
+
+  // Top 10 LPG
+  const lpgTop = [...districtData].sort((a,b)=>b.lpg-a.lpg).slice(0,10);
+  new Chart(document.getElementById('lpgTop10'), {
+    type:'bar',
+    data:{
+      labels:lpgTop.map(d=>d.district),
+      datasets:[{label:'LPG %',data:lpgTop.map(d=>d.lpg),
+        backgroundColor:lpgTop.map(d=>PROVINCE_COLORS[d.province]||'#1A7A7A'),borderRadius:3}]
+    },
+    options:{...chartDefaults,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{min:50,max:100,ticks:{font:{size:10}}},y:{ticks:{font:{size:9}}}}}
+  });
+}
+
+function renderAssetCharts() {
+  if(chartsRendered['assets']) return;
+  chartsRendered['assets'] = true;
+
+  new Chart(document.getElementById('assetNationalChart'), {
+    type:'bar',
+    data:{
+      labels:assetNational.map(d=>d.name),
+      datasets:[{label:'% of Households',data:assetNational.map(d=>d.val),
+        backgroundColor:['#1B2A4A','#C0392B','#D4A017','#1A7A7A','#27AE8F','#E67E22','#8E44AD','#2C3E50','#7F8C8D'],
+        borderRadius:3}]
+    },
+    options:{...chartDefaults,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{max:60,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}},y:{ticks:{font:{size:10}}}}}
+  });
+
+  new Chart(document.getElementById('assetProvinceChart'), {
+    type:'bar',
+    data:{
+      labels:PROV_ORDER,
+      datasets:[
+        {label:'TV',data:PROV_ORDER.map(p=>assetProv[p].tv),backgroundColor:'#1B2A4A',borderRadius:2},
+        {label:'Computer',data:PROV_ORDER.map(p=>assetProv[p].comp),backgroundColor:'#1A7A7A',borderRadius:2},
+        {label:'Refrigerator',data:PROV_ORDER.map(p=>assetProv[p].fridge),backgroundColor:'#C0392B',borderRadius:2}
+      ]
+    },
+    options:{...chartDefaults,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{max:75,ticks:{font:{size:10}},title:{display:true,text:'% of households',font:{size:10}}}}}
+  });
+
+  // Computer progress bars
+  const container2 = document.getElementById('computerBars');
+  computerProv.forEach(d => {
+    const color = PROVINCE_COLORS[d.p] || '#1A7A7A';
+    container2.innerHTML += `
+      <div class="progress-wrap">
+        <div class="progress-label"><span>${d.p}</span><span>${d.v.toFixed(1)}%</span></div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:${d.v/50*100}%;background:${color};"></div>
+        </div>
+      </div>`;
+  });
+}
+
+// ===== TABLE =====
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  const count = document.getElementById('tableCount');
+  tbody.innerHTML = '';
+  count.textContent = `${data.length} districts`;
+  data.forEach(d => {
+    const urbanPct = ((d.urban / d.pop) * d.pop / d.pop * 100).toFixed(1);
+    const regionClass = `badge-${d.region.toLowerCase()}`;
+    tbody.innerHTML += `<tr>
+      <td><strong>${d.district}</strong></td>
+      <td>${d.province}</td>
+      <td><span class="badge ${regionClass}">${d.region}</span></td>
+      <td>${d.pop.toFixed(0)}</td>
+      <td>${d.urban.toFixed(1)}%</td>
+      <td>${d.hhSize.toFixed(2)}</td>
+      <td><span style="color:${d.lpg>50?'#1A7A7A':d.lpg<15?'#C0392B':'#2C3E50'};font-weight:600;">${d.lpg.toFixed(1)}%</span></td>
+      <td><span style="color:${d.fuelwood>80?'#C0392B':d.fuelwood<30?'#1A7A7A':'#2C3E50'};font-weight:600;">${d.fuelwood.toFixed(1)}%</span></td>
+      <td><span style="color:${d.grid>90?'#1A7A7A':d.grid<60?'#C0392B':'#E67E22'};font-weight:600;">${d.grid.toFixed(1)}%</span></td>
+      <td>${d.cement.toFixed(1)}%</td>
+    </tr>`;
+  });
+}
+
+function filterTable() {
+  const prov = document.getElementById('filterProvince').value;
+  const region = document.getElementById('filterRegion').value;
+  const sortKey = document.getElementById('sortCol').value;
+  const sortMap = {pop:'pop',lpg:'lpg',fuelwood:'fuelwood',cement:'cement',grid:'grid'};
+  let data = [...districtData];
+  if(prov) data = data.filter(d=>d.province===prov);
+  if(region) data = data.filter(d=>d.region===region);
+  data.sort((a,b)=>b[sortMap[sortKey]]-a[sortMap[sortKey]]);
+  renderTable(data);
+}
+
+// ===== NAVIGATION =====
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    if(b.getAttribute('onclick')===`showSection('${id}')`) b.classList.add('active');
+  });
+
+  if(id==='overview') renderOverviewCharts();
+  else if(id==='population') renderPopCharts();
+  else if(id==='housing') renderHousingCharts();
+  else if(id==='energy') renderEnergyCharts();
+  else if(id==='assets') renderAssetCharts();
+  else if(id==='districts') { filterTable(); }
+}
+
+// Initial render
+renderOverviewCharts();
+renderTable([...districtData].sort((a,b)=>b.pop-a.pop));
+</script>
+</body>
+</html>

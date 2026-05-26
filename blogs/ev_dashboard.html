@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepal EV Import Dashboard | MoF Foreign Trade Statistics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ev-green: #00E676;
+    --ev-teal: #00BCD4;
+    --ev-amber: #FFB300;
+    --ev-red: #FF5252;
+    --bg-dark: #0A0F1A;
+    --bg-card: #111827;
+    --bg-card2: #151E2D;
+    --border: rgba(255,255,255,0.07);
+    --text-primary: #F0F4FF;
+    --text-secondary: #8A9BB5;
+    --text-muted: #4A5A6E;
+    --grid: rgba(255,255,255,0.04);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO HEADER ─── */
+  .hero {
+    background: linear-gradient(135deg, #0A0F1A 0%, #0D1B2A 40%, #0A1628 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -60px; right: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,230,118,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -100px; left: 30%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,188,212,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-top {
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.25);
+    border-radius: 100px; padding: 6px 16px;
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--ev-green); margin-bottom: 16px;
+  }
+  .hero-badge::before { content: '⚡'; font-size: 13px; }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--ev-green); }
+  .hero .subtitle {
+    color: var(--text-secondary); font-size: 15px; max-width: 560px; line-height: 1.6;
+  }
+  .source-tag {
+    font-size: 11px; color: var(--text-muted); margin-top: 20px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 14px; display: inline-block;
+  }
+  .source-tag strong { color: var(--text-secondary); }
+
+  /* ─── FILTERS ─── */
+  .filter-bar {
+    background: var(--bg-card); border-bottom: 1px solid var(--border);
+    padding: 12px 48px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .filter-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .filter-btn {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--text-secondary); padding: 6px 16px; border-radius: 20px;
+    font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .filter-btn:hover { border-color: var(--ev-green); color: var(--ev-green); }
+  .filter-btn.active { background: rgba(0,230,118,0.12); border-color: var(--ev-green); color: var(--ev-green); font-weight: 600; }
+
+  /* ─── MAIN LAYOUT ─── */
+  .dashboard {
+    padding: 32px 48px 64px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    display: flex; align-items: baseline; gap: 12px; margin: 40px 0 20px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-primary);
+  }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .section-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; }
+
+  /* ─── KPI CARDS ─── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent, var(--ev-green));
+  }
+  .kpi-card.green { --accent: var(--ev-green); }
+  .kpi-card.teal  { --accent: var(--ev-teal); }
+  .kpi-card.amber { --accent: var(--ev-amber); }
+  .kpi-card.red   { --accent: var(--ev-red); }
+  .kpi-icon { font-size: 22px; margin-bottom: 12px; }
+  .kpi-value {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    color: var(--text-primary); line-height: 1; margin-bottom: 4px;
+  }
+  .kpi-value span { font-size: 15px; font-weight: 600; color: var(--accent, var(--ev-green)); }
+  .kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .kpi-change {
+    font-size: 12px; font-weight: 600;
+    padding: 3px 8px; border-radius: 6px; display: inline-block;
+  }
+  .kpi-change.up { background: rgba(0,230,118,0.12); color: var(--ev-green); }
+  .kpi-change.down { background: rgba(255,82,82,0.12); color: var(--ev-red); }
+  .kpi-change.neutral { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+  /* ─── CHART CARDS ─── */
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .chart-grid-full { margin-bottom: 20px; }
+  .chart-grid-left-wide { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 1100px) {
+    .chart-grid-2, .chart-grid-3, .chart-grid-left-wide { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .chart-card:hover { border-color: rgba(255,255,255,0.1); }
+  .chart-title {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 4px;
+  }
+  .chart-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+  .chart-container { position: relative; }
+  .chart-container canvas { max-height: 280px; }
+  .chart-container.tall canvas { max-height: 340px; }
+  .chart-container.short canvas { max-height: 200px; }
+
+  /* ─── POLICY INSIGHT CARDS ─── */
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .insight-card {
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent, var(--ev-green));
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .insight-card.green { --accent: var(--ev-green); }
+  .insight-card.amber { --accent: var(--ev-amber); }
+  .insight-card.teal  { --accent: var(--ev-teal); }
+  .insight-card.red   { --accent: var(--ev-red); }
+  .insight-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--accent, var(--ev-green)); margin-bottom: 8px;
+  }
+  .insight-text { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+  .insight-text strong { color: var(--text-primary); }
+
+  /* ─── HEATMAP ─── */
+  .heatmap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .heatmap-table th { text-align: left; padding: 8px 10px; color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .heatmap-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-primary); font-size: 13px; font-weight: 500; }
+  .heatmap-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .hm-cell { border-radius: 5px; padding: 4px 8px; text-align: right; font-size: 12px; font-weight: 600; display: inline-block; min-width: 60px; }
+
+  /* ─── PROGRESS BARS ─── */
+  .progress-item { margin-bottom: 14px; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; color: var(--text-secondary); }
+  .progress-label .val { color: var(--text-primary); font-weight: 600; }
+  .progress-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center; padding: 32px 48px;
+    border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px;
+    line-height: 1.8;
+  }
+  .footer a { color: var(--ev-green); text-decoration: none; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform:none; } }
+  .kpi-card, .chart-card, .insight-card { animation: fadeUp 0.5s ease both; }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- ════════ HERO ════════ -->
+<header class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-badge">Electric Vehicle Transition Dashboard</div>
+      <h1>Nepal's Vehicle <span>Import Intelligence</span></h1>
+      <p class="subtitle">A comprehensive analysis of vehicle imports by engine type — tracking the electric revolution across quantity, value, and customs revenue from FY 2019/20 to 2025/26.</p>
+      <div class="source-tag"><strong>Data Source:</strong> Foreign Trade Statistics · Ministry of Finance (MoF), Nepal &nbsp;|&nbsp; <strong>Unit:</strong> Quantity (units), Value & Revenue (Million NRs)</div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════ STICKY FILTER ════════ -->
+<nav class="filter-bar">
+  <span class="filter-label">Year Focus:</span>
+  <button class="filter-btn active" onclick="setYear('all', this)">All Years</button>
+  <button class="filter-btn" onclick="setYear('recent', this)">Latest (2024/25)</button>
+  <button class="filter-btn" onclick="setYear('peak', this)">Peak Year</button>
+  <span style="flex:1"></span>
+  <span style="font-size:12px; color: var(--text-muted);">⚡ EVs represent Nepal's fastest growing import category</span>
+</nav>
+
+<!-- ════════ MAIN ════════ -->
+<main class="dashboard">
+
+  <!-- KPI ROW -->
+  <div class="section-header">
+    <span class="section-title">Key Performance Indicators</span>
+    <span class="section-line"></span>
+    <span class="section-sub">FY 2024/25 vs Prior Year</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">EV Units Imported (2024/25)</div>
+      <div class="kpi-value">44,509 <span>units</span></div>
+      <div class="kpi-change up">↑ 36.9% vs 2023/24</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">EV Import Value (2024/25)</div>
+      <div class="kpi-value">43,932 <span>M NRs</span></div>
+      <div class="kpi-change up">↑ 27.3% vs 2023/24</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon">🏛️</div>
+      <div class="kpi-label">EV Customs Revenue (2024/25)</div>
+      <div class="kpi-value">22,736 <span>M NRs</span></div>
+      <div class="kpi-change up">↑ 55.2% vs 2023/24</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">EV Share of Total Vehicles (2024/25)</div>
+      <div class="kpi-value">36.1 <span>%</span></div>
+      <div class="kpi-change up">↑ from 31.2% in 2023/24</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-icon">🌱</div>
+      <div class="kpi-label">EV Share of Import Value (2024/25)</div>
+      <div class="kpi-value">72.4 <span>%</span></div>
+      <div class="kpi-change up">↑ from 71.3% in 2023/24</div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 1 -->
+  <div class="section-header" style="margin-top:40px;">
+    <span class="section-title">Import Volume Trends</span>
+    <span class="section-line"></span>
+    <span class="section-sub">Units Imported by Engine Type</span>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-title">EV vs Non-EV Import Volume (Units)</div>
+      <div class="chart-desc">Annual vehicle imports by engine type. EVs have grown 15× since FY 2019/20 while non-electric imports declined sharply.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_volume_trend"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">EV Market Share of Total Imports (%)</div>
+      <div class="chart-desc">EVs now command over 36% of all vehicle imports by quantity — up from just 1.3% in FY 2019/20.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_ev_share"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 2 -->
+  <div class="section-header">
+    <span class="section-title">Import Value & Revenue</span>
+    <span class="section-line"></span>
+    <span class="section-sub">In Million Nepalese Rupees</span>
+  </div>
+
+  <div class="chart-grid-left-wide">
+    <div class="chart-card">
+      <div class="chart-title">Import Value by Engine Type (Million NRs)</div>
+      <div class="chart-desc">EV import value surged to NRs 43,932M in 2024/25 — overtaking all non-electric segments combined and now representing 72% of total vehicle import value.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_value_stacked"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">EV Customs Revenue Growth</div>
+      <div class="chart-desc">Revenue from EV imports grew from NRs 517M (2019/20) to NRs 22,736M (2024/25) — a 44× increase in five years.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_ev_revenue"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 3: EV BREAKDOWN -->
+  <div class="section-header">
+    <span class="section-title">EV Import Deep Dive</span>
+    <span class="section-line"></span>
+    <span class="section-sub">By Vehicle Category & Country of Origin</span>
+  </div>
+
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-title">EV Imports by Vehicle Type (2024/25)</div>
+      <div class="chart-desc">2-wheelers and 3-wheelers dominate EV imports, followed by electric cars.</div>
+      <div class="chart-container">
+        <canvas id="chart_ev_type_pie"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">EV Origin Country Split (2024/25)</div>
+      <div class="chart-desc">China dominates Nepal's EV imports at over 80% of all units. India is a secondary but significant source.</div>
+      <div class="chart-container">
+        <canvas id="chart_ev_country_pie"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">EV Growth by Vehicle Category</div>
+      <div class="chart-desc">Micro-bus and mini-bus EVs show explosive growth, while 2-wheelers and 3-wheelers maintain high volumes.</div>
+      <div class="chart-container">
+        <canvas id="chart_ev_category_growth"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 4: VEHICLE SEGMENT TRENDS -->
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-title">Electric Car Imports by Country (Units)</div>
+      <div class="chart-desc">China-origin electric cars surged from 236 units in 2019/20 to 10,216 in 2024/25. India dominates across all segments.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_car_origin"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Electric 3-Wheeler & 2-Wheeler Imports (Units)</div>
+      <div class="chart-desc">3-wheelers and 2-wheelers are the backbone of Nepal's EV revolution — critical for last-mile and urban mobility.</div>
+      <div class="chart-container tall">
+        <canvas id="chart_23w_trend"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 5 -->
+  <div class="section-header">
+    <span class="section-title">Revenue Efficiency & Cost Analysis</span>
+    <span class="section-line"></span>
+    <span class="section-sub">Value per Unit & Revenue Per Million NRs of Value</span>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-title">Average Import Value per EV Unit (NRs '000)</div>
+      <div class="chart-desc">The average cost per EV fluctuates with vehicle mix shifts. As cheaper 2W/3W grow, average price per unit falls — increasing accessibility.</div>
+      <div class="chart-container">
+        <canvas id="chart_avg_value"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Revenue-to-Value Ratio by Engine Type (%)</div>
+      <div class="chart-desc">EV customs revenue yield as a percentage of import value — shows how competitive customs policy is between EV and non-EV segments.</div>
+      <div class="chart-container">
+        <canvas id="chart_rev_ratio"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP / SHARE TABLE -->
+  <div class="section-header">
+    <span class="section-title">Country-Origin Share of EV Imports</span>
+    <span class="section-line"></span>
+    <span class="section-sub">Heatmap — Annual EV Units by Source Country</span>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-title">EV Import Quantity Heatmap by Segment × Country (All Years)</div>
+    <div class="chart-desc">Each cell shows units imported. Deeper green = higher volume. Reveals which segments China vs India dominates and where growth is concentrated.</div>
+    <div style="overflow-x:auto; margin-top:8px;">
+      <table class="heatmap-table" id="heatmap_table"></table>
+    </div>
+  </div>
+
+  <!-- ORIGIN SHARE PROGRESS BARS -->
+  <div class="chart-grid-2" style="margin-top:0;">
+    <div class="chart-card">
+      <div class="chart-title">Country Share of EV Imports — 2024/25 by Unit</div>
+      <div class="chart-desc">China's dominance in Nepal's EV supply chain. Concentration risk for policymakers.</div>
+      <div id="origin_bars" style="margin-top:16px;"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">EV Segment Share of Total EV Revenue (2024/25)</div>
+      <div class="chart-desc">Where EV customs revenue actually comes from — electric cars contribute the highest per-unit revenue.</div>
+      <div id="rev_segment_bars" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- POLICY INSIGHTS -->
+  <div class="section-header" style="margin-top:40px;">
+    <span class="section-title">Key Policy Takeaways</span>
+    <span class="section-line"></span>
+    <span class="section-sub">For Policymakers, Planners & Development Stakeholders</span>
+  </div>
+
+  <div class="insight-grid">
+    <div class="insight-card green">
+      <div class="insight-tag">🚀 Growth Signal</div>
+      <div class="insight-text"><strong>Nepal's EV transition is accelerating.</strong> From 2,940 units in 2019/20 to 44,509 in 2024/25, EV imports grew <strong>15×</strong> in five years — demonstrating strong consumer and commercial demand despite infrastructure gaps.</div>
+    </div>
+    <div class="insight-card amber">
+      <div class="insight-tag">💰 Revenue Impact</div>
+      <div class="insight-text"><strong>EVs are now a major customs revenue source.</strong> EV-related customs revenue reached <strong>NRs 22,736M</strong> in 2024/25 — exceeding total non-electric vehicle revenue. Policy must balance promotion with fiscal sustainability.</div>
+    </div>
+    <div class="insight-card teal">
+      <div class="insight-tag">🏭 Supply Chain Risk</div>
+      <div class="insight-text"><strong>China accounts for 80%+ of all EV imports.</strong> This supply concentration poses geopolitical and trade risk. Nepal should consider <strong>diversifying sourcing</strong> and incentivising domestic assembly or regional partnerships.</div>
+    </div>
+    <div class="insight-card green">
+      <div class="insight-tag">🛺 Mobility Justice</div>
+      <div class="insight-text"><strong>3-wheelers and 2-wheelers lead EV adoption</strong> — together comprising 65%+ of all EV imports. These serve rural and urban last-mile transport. EV incentives should explicitly protect <strong>affordability for small operators</strong>.</div>
+    </div>
+    <div class="insight-card red">
+      <div class="insight-tag">⚠️ 2025/26 Dip</div>
+      <div class="insight-text"><strong>EV imports dipped in 2025/26 (39,358 vs 44,509).</strong> This may reflect import duty adjustments, credit tightening, or early-market saturation. Policymakers should <strong>monitor and sustain incentive structures</strong> to avoid demand shock.</div>
+    </div>
+    <div class="insight-card teal">
+      <div class="insight-tag">🔌 Infrastructure Urgency</div>
+      <div class="insight-text"><strong>Rapid EV growth demands matching infrastructure.</strong> Import volumes suggest Nepal needs accelerated investment in <strong>EV charging networks, grid capacity, and battery service ecosystems</strong> to support the installed EV fleet.</div>
+    </div>
+    <div class="insight-card amber">
+      <div class="insight-tag">🚌 Public Transport EV</div>
+      <div class="insight-text"><strong>Electric mini-buses surged from 3 units to 1,260 in 2024/25.</strong> This marks a tipping point for <strong>public transport electrification</strong>. Targeted subsidy and route-financing programs for EV transit operators can lock in this momentum.</div>
+    </div>
+    <div class="insight-card green">
+      <div class="insight-tag">🌿 Environmental Wins</div>
+      <div class="insight-text">Replacing ~44,000 annual non-EV vehicle imports with EVs could <strong>eliminate millions of tonnes of CO₂</strong> over vehicle lifetimes. Nepal's hydropower advantage makes EV adoption uniquely impactful for <strong>net-zero commitments</strong>.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div>Nepal EV Import Dashboard &nbsp;·&nbsp; Data: Foreign Trade Statistics, Ministry of Finance (MoF), Nepal &nbsp;·&nbsp; Fiscal Years 2019/20 – 2025/26</div>
+  <div style="margin-top:6px; color: var(--text-muted);">Values in Million Nepalese Rupees (NRs) &nbsp;|&nbsp; Quantity in Units &nbsp;|&nbsp; "na" values treated as zero in aggregations</div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const YEARS = ['2019/20','2020/21','2021/22','2022/23','2023/24','2024/25','2025/26'];
+const SHORT_YEARS = ['FY20','FY21','FY22','FY23','FY24','FY25','FY26'];
+
+const EV_QTY    = [2940, 6858, 12831, 18949, 32503, 44509, 39358];
+const HYB_QTY   = [8, 13, 25, 48, 36, 85, 33];
+const NON_QTY   = [217599, 368908, 197664, 66636, 70374, 78979, 45124];
+
+const EV_VAL    = [2139.7, 1450.0, 6764.1, 14670.2, 34521.9, 43931.9, 23311.7];
+const HYB_VAL   = [77.9, 111.4, 202.9, 200.0, 169.1, 366.9, 212.9];
+const NON_VAL   = [2987.5, 46304.5, 31805.2, 10869.9, 13931.7, 16678.6, 13566.0];
+
+const EV_REV    = [516.6, 552.5, 1756.1, 3912.6, 14652.2, 22736.3, 12060.0];
+const HYB_REV   = [80.1, 250.8, 374.9, 361.1, 395.3, 894.5, 510.9];
+const NON_REV   = [2617.4, 62748.6, 50643.5, 15550.5, 20831.5, 23685.2, 21427.3];
+
+// EV by type 2024/25 (units)
+const EV_TYPE_24 = {
+  'Bus': 16, 'Mini Bus': 1260, 'Micro Bus': 1830,
+  'Car': 13578, '3 Wheeler': 16505, '2 Wheeler': 11320
+};
+
+// Country origin of EVs 2024/25
+const EV_COUNTRY_24 = { 'China': 36671, 'India': 8275, 'Others': 282 };
+
+// Car imports by country (all years)
+const CAR_INDIA  = [877,25,696,2277,3377,3246,1839];
+const CAR_CHINA  = [236,140,823,1371,8065,10216,4866];
+const CAR_OTHERS = [264,84,288,402,259,116,468];
+
+// 3W + 2W EV
+const W3_TOTAL = [208,4250,7322,7463,13928,16505,14878];
+const W2_TOTAL = [1349,2333,3610,7155,5990,11320,16197];
+
+// Revenue segment 2024/25 (M NRs)
+const REV_SEG_24 = {
+  'Car': 21305.6, '3 Wheeler': 572.6, '2 Wheeler': 376.5,
+  'Micro Bus': 1322.8, 'Mini Bus': 737.2, 'Bus': 21.3
+};
+
+// ═══════════════════════════════════════════════
+// CHART DEFAULTS
+// ═══════════════════════════════════════════════
+Chart.defaults.color = '#8A9BB5';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+const EV_GREEN  = '#00E676';
+const EV_TEAL   = '#00BCD4';
+const EV_AMBER  = '#FFB300';
+const EV_RED    = '#FF5252';
+const EV_PURPLE = '#CE93D8';
+const GREY      = 'rgba(255,255,255,0.15)';
+
+function mkGrad(ctx, color, alpha1=0.35, alpha2=0.0) {
+  const g = ctx.createLinearGradient(0, 0, 0, 320);
+  g.addColorStop(0, color.replace(')', `, ${alpha1})`).replace('rgb', 'rgba'));
+  g.addColorStop(1, color.replace(')', `, ${alpha2})`).replace('rgb', 'rgba'));
+  return g;
+}
+
+// ═══════════════════════════════════════════════
+// CHART 1: Volume Trend
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_volume_trend').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [
+        {
+          label: 'Non-Electric',
+          data: NON_QTY,
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          borderColor: 'rgba(255,255,255,0.2)',
+          borderWidth: 1, borderRadius: 4, yAxisID: 'y'
+        },
+        {
+          label: 'Electric',
+          data: EV_QTY,
+          backgroundColor: 'rgba(0,230,118,0.7)',
+          borderColor: EV_GREEN,
+          borderWidth: 1, borderRadius: 4, yAxisID: 'y'
+        },
+        {
+          label: 'Hybrid',
+          data: HYB_QTY,
+          backgroundColor: 'rgba(0,188,212,0.6)',
+          borderColor: EV_TEAL,
+          borderWidth: 1, borderRadius: 4, yAxisID: 'y'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } }, tooltip: { mode: 'index' } },
+      scales: {
+        y: { stacked: false, ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 2: EV Share %
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_ev_share').getContext('2d');
+  const totals = EV_QTY.map((e,i) => e + HYB_QTY[i] + NON_QTY[i]);
+  const share = EV_QTY.map((e,i) => +(100*e/totals[i]).toFixed(1));
+  const grad = ctx.createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, 'rgba(0,230,118,0.3)');
+  grad.addColorStop(1, 'rgba(0,230,118,0)');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [{
+        label: 'EV Share (%)',
+        data: share,
+        borderColor: EV_GREEN, borderWidth: 3,
+        backgroundColor: grad,
+        fill: true, tension: 0.4,
+        pointBackgroundColor: EV_GREEN, pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.parsed.y}%` } } },
+      scales: {
+        y: { ticks: { callback: v => v+'%' }, grid: { color: 'rgba(255,255,255,0.04)' }, min: 0, max: 60 },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 3: Value Stacked Bar
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_value_stacked').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [
+        { label: 'EV', data: EV_VAL, backgroundColor: 'rgba(0,230,118,0.75)', borderRadius: 3 },
+        { label: 'Hybrid', data: HYB_VAL, backgroundColor: 'rgba(0,188,212,0.7)', borderRadius: 3 },
+        { label: 'Non-Electric', data: NON_VAL, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12 } }, tooltip: { mode: 'index', callbacks: { label: c => ` ${c.dataset.label}: NRs ${c.parsed.y.toFixed(0)}M` } } },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => (v/1000).toFixed(0)+'k' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 4: EV Revenue Bar
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_ev_revenue').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, 'rgba(255,179,0,0.5)');
+  grad.addColorStop(1, 'rgba(255,179,0,0.05)');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [{
+        label: 'EV Customs Revenue (M NRs)',
+        data: EV_REV,
+        backgroundColor: grad,
+        borderColor: EV_AMBER, borderWidth: 2, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` NRs ${c.parsed.y.toFixed(0)}M` } } },
+      scales: {
+        y: { ticks: { callback: v => (v/1000).toFixed(0)+'k M' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 5: EV Type Pie
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_ev_type_pie').getContext('2d');
+  const labels = Object.keys(EV_TYPE_24);
+  const values = Object.values(EV_TYPE_24);
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values,
+        backgroundColor: ['rgba(0,230,118,0.7)','rgba(0,188,212,0.7)','rgba(255,179,0,0.7)',
+                          'rgba(206,147,216,0.7)','rgba(255,82,82,0.7)','rgba(129,199,132,0.7)'],
+        borderWidth: 2, borderColor: '#111827' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 11 } } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.toLocaleString()} units` } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 6: EV Country Pie
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_ev_country_pie').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['China','India','Others'],
+      datasets: [{ data: [36671, 8275, 282],
+        backgroundColor: ['rgba(0,230,118,0.7)','rgba(255,179,0,0.7)','rgba(255,255,255,0.15)'],
+        borderWidth: 2, borderColor: '#111827' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 14 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.toLocaleString()} units (${(100*c.parsed/44509).toFixed(1)}%)` } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 7: EV Category Growth (grouped bar)
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_ev_category_growth').getContext('2d');
+  const cat = ['Car','3W','2W','Micro Bus','Mini Bus','Bus'];
+  const fy20 = [1377, 208, 1349, 1, 3, 2];
+  const fy25 = [13578, 16505, 11320, 1830, 1260, 16];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: cat,
+      datasets: [
+        { label: 'FY2019/20', data: fy20, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 4 },
+        { label: 'FY2024/25', data: fy25, backgroundColor: 'rgba(0,230,118,0.65)', borderRadius: 4, borderColor: EV_GREEN, borderWidth: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 10 } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 8: Car by origin
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_car_origin').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [
+        { label: 'India', data: CAR_INDIA, borderColor: EV_AMBER, backgroundColor: 'rgba(255,179,0,0.08)', fill:true, tension:0.4, borderWidth:2.5, pointRadius:4 },
+        { label: 'China', data: CAR_CHINA, borderColor: EV_GREEN, backgroundColor: 'rgba(0,230,118,0.08)', fill:true, tension:0.4, borderWidth:2.5, pointRadius:4 },
+        { label: 'Others', data: CAR_OTHERS, borderColor: 'rgba(255,255,255,0.4)', backgroundColor: 'rgba(255,255,255,0.02)', fill:true, tension:0.4, borderWidth:2, pointRadius:4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth:10 } } },
+      scales: {
+        y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 9: 3W + 2W EV
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_23w_trend').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [
+        { label: '3-Wheeler EV', data: W3_TOTAL, backgroundColor: 'rgba(255,82,82,0.65)', borderRadius: 4 },
+        { label: '2-Wheeler EV', data: W2_TOTAL, backgroundColor: 'rgba(0,188,212,0.65)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } }, tooltip: { mode: 'index' } },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 10: Avg value per EV
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_avg_value').getContext('2d');
+  const avg = EV_VAL.map((v,i) => EV_QTY[i] > 0 ? +(v*1000/EV_QTY[i]).toFixed(1) : 0); // in '000 NRs
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [{
+        label: "Avg Value / EV (NRs '000)",
+        data: avg,
+        borderColor: EV_PURPLE, borderWidth: 3,
+        backgroundColor: 'rgba(206,147,216,0.08)', fill: true,
+        tension: 0.4, pointBackgroundColor: EV_PURPLE, pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` NRs ${c.parsed.y.toFixed(0)}k` } } },
+      scales: {
+        y: { ticks: { callback: v => 'NRs '+(v).toFixed(0)+'k' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 11: Rev/Value ratio comparison
+// ═══════════════════════════════════════════════
+(function() {
+  const ctx = document.getElementById('chart_rev_ratio').getContext('2d');
+  const evRatio  = EV_VAL.map((v,i) => v > 0 ? +(100*EV_REV[i]/v).toFixed(1) : 0);
+  const nonRatio = NON_VAL.map((v,i) => v > 0 ? +(100*NON_REV[i]/v).toFixed(1) : 0);
+  const hybRatio = HYB_VAL.map((v,i) => v > 0 ? +(100*HYB_REV[i]/v).toFixed(1) : 0);
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: SHORT_YEARS,
+      datasets: [
+        { label: 'Electric', data: evRatio, borderColor: EV_GREEN, borderWidth:2.5, tension:0.4, pointRadius:4 },
+        { label: 'Non-Electric', data: nonRatio, borderColor: 'rgba(255,255,255,0.35)', borderWidth:2, tension:0.4, pointRadius:4 },
+        { label: 'Hybrid', data: hybRatio, borderColor: EV_TEAL, borderWidth:2, tension:0.4, pointRadius:4, borderDash:[4,4] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth:10 } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y}%` } } },
+      scales: {
+        y: { ticks: { callback: v => v+'%' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// HEATMAP TABLE
+// ═══════════════════════════════════════════════
+(function() {
+  const segments = [
+    { label: 'Car', india: CAR_INDIA, china: CAR_CHINA, others: CAR_OTHERS },
+    { label: '3-Wheeler', india: [25,889,1744,1071,1588,1550,1249], china: [183,3361,5578,6392,10583,14955,13629], others: [0,0,0,0,1757,0,0] },
+    { label: '2-Wheeler', india: [297,845,854,1788,5916,2129,3799], china: [1052,1487,2754,5291,74,9025,12011], others: [0,1,2,76,0,166,387] },
+    { label: 'Micro Bus',  india: [0,0,0,3,0,0,0], china: [1,17,84,238,537,1830,853], others: [0,0,0,0,0,0,0] },
+    { label: 'Mini Bus',   india: [0,0,0,0,0,0,1], china: [3,5,1,3,336,1260,254], others: [0,0,0,0,0,0,0] },
+    { label: 'Bus',        india: [0,0,4,0,0,1,0], china: [2,4,3,37,11,15,2], others: [0,0,0,0,0,0,0] }
+  ];
+
+  function cellColor(val, max) {
+    if (val === 0) return 'background:rgba(255,255,255,0.03); color:#4A5A6E';
+    const intensity = val / max;
+    if (intensity > 0.7) return 'background:rgba(0,230,118,0.55); color:#000';
+    if (intensity > 0.4) return 'background:rgba(0,230,118,0.35); color:#00E676';
+    if (intensity > 0.15) return 'background:rgba(0,230,118,0.15); color:#00E676';
+    return 'background:rgba(0,230,118,0.05); color:#4A9A6A';
+  }
+
+  const maxVal = 15000;
+  const tbl = document.getElementById('heatmap_table');
+  let html = '<thead><tr><th>Segment</th><th>Country</th>';
+  SHORT_YEARS.forEach(y => html += `<th style="text-align:right">${y}</th>`);
+  html += '</tr></thead><tbody>';
+  segments.forEach(seg => {
+    [['India', seg.india], ['China', seg.china], ['Others', seg.others]].forEach(([country, vals], ci) => {
+      html += '<tr>';
+      if (ci === 0) html += `<td rowspan="3" style="font-weight:700; color:var(--text-primary); vertical-align:middle">${seg.label}</td>`;
+      html += `<td style="color:var(--text-secondary)">${country}</td>`;
+      vals.forEach(v => {
+        html += `<td><span class="hm-cell" style="${cellColor(v, maxVal)}">${v > 0 ? v.toLocaleString() : '–'}</span></td>`;
+      });
+      html += '</tr>';
+    });
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+})();
+
+// ═══════════════════════════════════════════════
+// PROGRESS BARS — Origin share
+// ═══════════════════════════════════════════════
+(function() {
+  const container = document.getElementById('origin_bars');
+  const total = 44509;
+  const data = [
+    { label: 'China', val: 36671, color: EV_GREEN },
+    { label: 'India', val: 8275, color: EV_AMBER },
+    { label: 'Others', val: 282, color: EV_TEAL }
+  ];
+  container.innerHTML = data.map(d => `
+    <div class="progress-item">
+      <div class="progress-label">
+        <span>${d.label}</span>
+        <span class="val">${d.val.toLocaleString()} units (${(100*d.val/total).toFixed(1)}%)</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${100*d.val/total}%; background:${d.color}"></div>
+      </div>
+    </div>
+  `).join('');
+})();
+
+// ═══════════════════════════════════════════════
+// PROGRESS BARS — Revenue by segment
+// ═══════════════════════════════════════════════
+(function() {
+  const container = document.getElementById('rev_segment_bars');
+  const totalRev = Object.values(REV_SEG_24).reduce((a,b)=>a+b,0);
+  const colors = [EV_GREEN, EV_TEAL, EV_AMBER, EV_PURPLE, EV_RED, 'rgba(255,255,255,0.4)'];
+  const items = Object.entries(REV_SEG_24).sort((a,b)=>b[1]-a[1]);
+  container.innerHTML = items.map(([k,v], i) => `
+    <div class="progress-item">
+      <div class="progress-label">
+        <span>${k}</span>
+        <span class="val">NRs ${v.toFixed(0)}M (${(100*v/totalRev).toFixed(1)}%)</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${100*v/totalRev}%; background:${colors[i%colors.length]}"></div>
+      </div>
+    </div>
+  `).join('');
+})();
+
+// ═══════════════════════════════════════════════
+// FILTER BUTTONS (UI only — charts pre-annotated)
+// ═══════════════════════════════════════════════
+function setYear(mode, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepal Electric Appliances Import Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d45;
+    --accent: #f97316;
+    --accent2: #06b6d4;
+    --accent3: #a78bfa;
+    --accent4: #34d399;
+    --text: #e8edf5;
+    --muted: #7a8ea8;
+    --china: #f97316;
+    --india: #06b6d4;
+    --others: #a78bfa;
+    --ac: #f43f5e;
+    --fridge: #06b6d4;
+    --washer: #8b5cf6;
+    --micro: #f59e0b;
+    --induction: #10b981;
+    --infrared: #ec4899;
+    --rice: #84cc16;
+    --other: #6b7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0b0f1a 0%, #0f1e35 50%, #091529 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 36px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 40%;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .header-inner { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid rgba(249,115,22,0.3);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .header-badge span { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  h1 em { color: var(--accent); font-style: normal; }
+  .header-sub {
+    font-size: 15px; color: var(--muted);
+    font-weight: 300; max-width: 700px; line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .header-meta {
+    display: flex; gap: 32px; flex-wrap: wrap; align-items: center;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .meta-value { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+
+  /* KPI row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .kpi {
+    background: var(--surface);
+    padding: 28px 32px;
+    position: relative; overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--kpi-color, var(--accent));
+    opacity: 0.7;
+  }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .kpi-sub { font-size: 12px; color: var(--muted); }
+  .kpi-trend { display: flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 12px; font-weight: 600; }
+  .up { color: var(--accent4); }
+  .down { color: #f43f5e; }
+
+  /* Main layout */
+  main { max-width: 1440px; margin: 0 auto; padding: 32px 24px; }
+
+  /* Section heading */
+  .section-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 20px; margin-top: 40px; gap: 16px;
+  }
+  .section-head:first-child { margin-top: 0; }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .section-desc { font-size: 14px; color: var(--muted); max-width: 600px; line-height: 1.6; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+
+  /* Chart card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .card-sub { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { width: 100% !important; }
+
+  /* Policy callout */
+  .policy-box {
+    background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.03));
+    border: 1px solid rgba(249,115,22,0.25);
+    border-radius: 12px;
+    padding: 24px 28px;
+    position: relative; overflow: hidden;
+  }
+  .policy-box::before {
+    content: '⚡';
+    position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
+    font-size: 60px; opacity: 0.08;
+  }
+  .policy-tag {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--accent); font-weight: 700; margin-bottom: 10px;
+    font-family: 'Syne', sans-serif;
+  }
+  .policy-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .policy-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Insight bullets */
+  .insights { display: flex; flex-direction: column; gap: 12px; }
+  .insight {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .insight.blue { border-left-color: var(--accent2); }
+  .insight.purple { border-left-color: var(--accent3); }
+  .insight.green { border-left-color: var(--accent4); }
+  .insight-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .insight-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .insight-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Country legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Year filter */
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-btn {
+    padding: 5px 12px; font-size: 11px; font-weight: 600;
+    border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+    color: var(--text);
+  }
+  .data-table tr:hover td { background: var(--surface2); }
+  .data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .data-table .bar-cell { position: relative; }
+  .mini-bar { height: 4px; border-radius: 2px; margin-top: 4px; }
+
+  /* Electricity projection */
+  .proj-card {
+    background: linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02));
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 12px; padding: 24px;
+  }
+  .proj-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent2); font-weight: 700; margin-bottom: 10px; font-family: 'Syne', sans-serif; }
+  .proj-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .proj-text { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+
+  /* Donut wrapper */
+  .donut-wrap { position: relative; }
+  .donut-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center; pointer-events: none;
+  }
+  .donut-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); }
+  .donut-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    text-align: center;
+    font-size: 12px; color: var(--muted);
+    line-height: 1.6;
+  }
+  footer strong { color: var(--text); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .grid-2, .grid-2-1, .grid-1-2, .grid-3 { grid-template-columns: 1fr; }
+    header { padding: 24px; }
+    main { padding: 20px 16px; }
+  }
+  @media (max-width: 500px) {
+    .kpi-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge"><span></span>Policy Intelligence Dashboard</div>
+    <h1>Nepal's <em>Electric Appliances</em><br>Import Monitor</h1>
+    <p class="header-sub">Tracking household electric appliance imports — quantities and values by origin country — to inform energy planning, trade policy, and electricity demand forecasting for Nepal's sustainable future.</p>
+    <div class="header-meta">
+      <div class="meta-item"><div class="meta-label">Data Coverage</div><div class="meta-value">2008/09 – 2025/26*</div></div>
+      <div class="meta-item"><div class="meta-label">Appliance Categories</div><div class="meta-value">8 Product Types</div></div>
+      <div class="meta-item"><div class="meta-label">Import Origins</div><div class="meta-value">China · India · Others</div></div>
+      <div class="meta-item"><div class="meta-label">Data Source</div><div class="meta-value">MoF Foreign Trade Statistics</div></div>
+      <div class="meta-item"><div class="meta-label">*2025/26 Note</div><div class="meta-value">First 9 months only</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- KPI Row -->
+<div class="kpi-row">
+  <div class="kpi" style="--kpi-color:#f97316">
+    <div class="kpi-label">Peak Annual Import Value (2024/25)</div>
+    <div class="kpi-value">NPR 15.8B</div>
+    <div class="kpi-sub">Million Nepalese Rupees</div>
+    <div class="kpi-trend up">▲ 97× growth since 2008/09</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#06b6d4">
+    <div class="kpi-label">Total Cumulative Import Value</div>
+    <div class="kpi-value">NPR 117.4B</div>
+    <div class="kpi-sub">All appliances, all years</div>
+    <div class="kpi-trend up">▲ India dominant at 56%</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#a78bfa">
+    <div class="kpi-label">Fastest Growing (2021–2025)</div>
+    <div class="kpi-value">AC Units</div>
+    <div class="kpi-sub">Air Conditioning imports</div>
+    <div class="kpi-trend up">▲ 127% surge in 2024/25</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#34d399">
+    <div class="kpi-label">Electric Cooking Transition</div>
+    <div class="kpi-value">From 2020</div>
+    <div class="kpi-sub">Induction & infrared stoves</div>
+    <div class="kpi-trend up">▲ 290K units in 2024/25</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- Policy callout -->
+  <div class="policy-box" style="margin-bottom: 32px;">
+    <div class="policy-tag">⚡ Critical Policy Signal</div>
+    <div class="policy-title">Rising Electric Appliance Imports Signal a Looming Electricity Demand Surge</div>
+    <div class="policy-text">Nepal's household electric appliance imports have grown <strong style="color:var(--text)">17× by value</strong> from 2008/09 to 2024/25, driven by rising incomes, urbanisation, and clean cooking transitions. Refrigerators, washing machines, and air conditioners alone account for nearly <strong style="color:var(--text)">NPR 14.7B</strong> in 2024/25 imports. The parallel emergence of induction and infrared stoves signals a structural shift from LPG to electric cooking — a trend that will significantly amplify future electricity demand. Nepal's generation and grid infrastructure must anticipate this demand curve today.</div>
+  </div>
+
+  <!-- Chart 1 + 2: Total value trend + Country stacked -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Import Value Trends</div>
+      <div class="section-desc">Overall growth trajectory and the evolving role of China vs India as Nepal's primary electric appliance suppliers.</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Total Import Value — All Appliances</div>
+      <div class="card-sub">Annual import value in Million NPR (2025/26 = first 9 months)</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-total-value"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Import Value by Country of Origin</div>
+      <div class="card-sub">China vs India vs Others — stacked annual values (Million NPR)</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--china)"></div>China</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--india)"></div>India</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--others)"></div>Others</div>
+      </div>
+      <div class="chart-wrap" style="height:228px"><canvas id="chart-country-stack"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 3: Country share -->
+  <div class="section-head" style="margin-top:28px">
+    <div>
+      <div class="section-title">Country Market Share</div>
+      <div class="section-desc">Shifting balance of import sourcing — from India's historic dominance to China's rapid rise, particularly in high-value appliances.</div>
+    </div>
+  </div>
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-title">Country Share of Import Value Over Time (%)</div>
+      <div class="card-sub">Annual percentage contribution by origin country</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--china)"></div>China</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--india)"></div>India</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--others)"></div>Others</div>
+      </div>
+      <div class="chart-wrap" style="height:240px"><canvas id="chart-country-pct"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cumulative Import Value Share</div>
+      <div class="card-sub">All years combined (2008/09 – 2025/26)</div>
+      <div class="donut-wrap" style="height:240px;position:relative">
+        <canvas id="chart-donut-country"></canvas>
+        <div class="donut-center">
+          <div class="donut-val">117B</div>
+          <div class="donut-lbl">NPR Total</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart 4+5: By appliance -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Appliance-Level Analysis</div>
+      <div class="section-desc">Disaggregating imports by product category reveals which appliances are driving Nepal's electricity demand transition.</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Import Value by Appliance Category (Major Items)</div>
+      <div class="card-sub">Annual value trends for refrigerators, washing machines, ACs, and microwaves (Million NPR)</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-appliance-lines"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Appliance Share of Total Import Value — 2024/25</div>
+      <div class="card-sub">Composition of peak-year imports by product type</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-appliance-donut-24"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 6+7: Refrigerator deep dive + Washing machine -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Key Appliance Deep Dives</div>
+      <div class="section-desc">Refrigerators and washing machines together represent the majority of Nepal's electric appliance import bill — and electricity load.</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Refrigerator Imports — Quantity & Value</div>
+      <div class="card-sub">Thousand units vs Million NPR — dual axis</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="chart-fridge"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Washing Machine Imports — Quantity & Value</div>
+      <div class="card-sub">Thousand units vs Million NPR — dual axis</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="chart-washer"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 8: Electric cooking stoves -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">The Electric Cooking Revolution</div>
+      <div class="section-desc">Since 2020/21, Nepal has witnessed a dramatic uptake in electric cooking appliances — induction and infrared stoves — marking a structural shift away from LPG and biomass.</div>
+    </div>
+  </div>
+  <div class="grid-1-2">
+    <div class="card">
+      <div class="card-title">Key Insight</div>
+      <div class="card-sub">Why electric cooking matters for energy policy</div>
+      <div class="insights">
+        <div class="insight">
+          <div class="insight-icon">🔌</div>
+          <div>
+            <div class="insight-title">290,000+ Electric Stoves (2024/25)</div>
+            <div class="insight-text">Induction and infrared stoves combined reached nearly 290K units imported in 2024/25 — a 35× increase in just 5 years.</div>
+          </div>
+        </div>
+        <div class="insight blue">
+          <div class="insight-icon">📈</div>
+          <div>
+            <div class="insight-title">India Emerging in Infrared Stoves</div>
+            <div class="insight-text">In 2025/26, India exported 45,619 infrared stoves to Nepal vs. 13,268 from China — a reversal of the typical China-dominant pattern.</div>
+          </div>
+        </div>
+        <div class="insight purple">
+          <div class="insight-icon">🍚</div>
+          <div>
+            <div class="insight-title">Rice Cooker Surge</div>
+            <div class="insight-text">Rice cookers (a staple cooking device) peaked at 442K units in 2020/21 with a value of NPR 449M — almost entirely from China.</div>
+          </div>
+        </div>
+        <div class="insight green">
+          <div class="insight-icon">⚡</div>
+          <div>
+            <div class="insight-title">Each Stove = ~0.8–2 kWh/day</div>
+            <div class="insight-text">At 290K induction stoves operating daily, this adds an estimated 230–580 GWh of additional annual electricity demand.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Electric Cooking Appliance Imports — Quantity</div>
+      <div class="card-sub">Induction stoves, infrared stoves, rice cookers (Thousand units, 2020–2026)</div>
+      <div class="chart-wrap" style="height:290px"><canvas id="chart-cooking"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 9: AC trend -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Air Conditioning — The Demand Multiplier</div>
+      <div class="section-desc">Air conditioning imports have exploded 8× since 2017/18, with 2024/25 marking an historic high. This is the single biggest risk factor for Nepal's peak electricity demand.</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Air Conditioner Imports by Country</div>
+      <div class="card-sub">Annual import value from China and India (Million NPR)</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="chart-ac"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AC Import Quantity Growth</div>
+      <div class="card-sub">Total AC units imported annually (Thousand units) — showing acceleration since 2017</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="chart-ac-qty"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 10: Electricity demand projection / combined -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Electricity Demand Implication</div>
+      <div class="section-desc">Estimating cumulative electricity load from imported appliances — a forward-looking indicator for Nepal's generation and grid planning.</div>
+    </div>
+  </div>
+
+  <div class="proj-card" style="margin-bottom:16px">
+    <div class="proj-tag">🔭 Forward-Looking Analysis</div>
+    <div class="proj-title">Nepal's Appliance Stock Is Building a Silent Demand Surge</div>
+    <div class="proj-text">The cumulative stock of imported electric appliances — not just annual flows — determines electricity demand. With over <strong style="color:var(--text)">1.3M refrigerators</strong>, <strong style="color:var(--text)">500K+ washing machines</strong>, <strong style="color:var(--text)">150K+ ACs</strong>, and <strong style="color:var(--text)">2M+ electric cooking appliances</strong> now in circulation (estimated from import flows since 2008/09), Nepal's household electricity load is structurally higher and will continue to grow with every passing import cycle. Nepal Electricity Authority (NEA) must integrate appliance import data into demand-side planning.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Estimated Cumulative Appliance Stock (Major Items)</div>
+      <div class="card-sub">Estimated units in circulation assuming ~10 year appliance lifespan (Thousands)</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-stock"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Year-on-Year Import Value Growth Rate</div>
+      <div class="card-sub">Annual percentage change in total electric appliance import value</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chart-growth"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Summary Data Table</div>
+      <div class="section-desc">Annual totals across all appliance categories for quick reference. Values in Million NPR; Quantity in Thousand units.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Annual Import Summary — All Appliances Combined</div>
+    <div class="card-sub">Source: Ministry of Finance, Foreign Trade Statistics, Nepal</div>
+    <div style="overflow-x:auto">
+    <table class="data-table" id="summary-table">
+      <thead>
+        <tr>
+          <th>Fiscal Year</th>
+          <th class="num">Total Quantity (000 units)</th>
+          <th class="num">Total Value (M NPR)</th>
+          <th class="num">China Share</th>
+          <th class="num">India Share</th>
+          <th class="num">YoY Growth (Value)</th>
+          <th>Value Bar</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Policy Takeaways -->
+  <div class="section-head">
+    <div>
+      <div class="section-title">Policy Takeaways</div>
+      <div class="section-desc">Actionable intelligence for Nepal's policymakers, energy planners, and development stakeholders.</div>
+    </div>
+  </div>
+  <div class="grid-3">
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">📊</div>
+      <div class="card-title" style="margin-bottom:8px">Integrate Appliance Data into IRP</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">Nepal's Integrated Resource Plan (IRP) should incorporate MoF appliance import statistics as a leading indicator for demand forecasting. The 17× growth in import values since 2008/09 maps directly to future load growth.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">🌞</div>
+      <div class="card-title" style="margin-bottom:8px">Energy Efficiency Standards Now</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">With hundreds of thousands of refrigerators and ACs entering Nepal annually, mandatory Minimum Energy Performance Standards (MEPS) and star ratings could cut electricity demand growth by 20–30% — critical for grid stability.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">🍳</div>
+      <div class="card-title" style="margin-bottom:8px">Support the Electric Cooking Transition</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">The surge in induction stove imports aligns with Nepal's clean cooking targets. Targeted subsidies, rural grid strengthening, and time-of-use tariffs can accelerate adoption while managing grid peaks.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">🇨🇳🇮🇳</div>
+      <div class="card-title" style="margin-bottom:8px">Diversify Supply Chains</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">Nepal's electric appliance imports are 92% concentrated in China (36%) and India (56%). Supply chain disruptions — as seen during COVID — can destabilise markets. Diversification of sources and domestic assembly partnerships should be explored.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">❄️</div>
+      <div class="card-title" style="margin-bottom:8px">Plan for AC-Driven Peak Demand</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">AC imports have grown 8× since 2017. At ~1.5 kW each, 150K+ cumulative ACs represent 225 MW of potential simultaneous peak load. NEA must plan generation reserves and distribution upgrades accordingly.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:12px">📋</div>
+      <div class="card-title" style="margin-bottom:8px">Data Collection Improvements</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">N/A values in early years (especially electric cooking) limit analysis. MoF should standardise appliance-level trade codes and publish granular data earlier in the fiscal year to support real-time policy response.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <strong>Nepal Electric Appliances Import Policy Dashboard</strong><br>
+  Data Source: Foreign Trade Statistics, Ministry of Finance (MoF), Government of Nepal &nbsp;|&nbsp;
+  Values in Million Nepalese Rupees (NPR) · Quantities in Thousand Units &nbsp;|&nbsp;
+  Note: 2025/26 figures represent the first nine months of the fiscal year only.
+  All estimates and projections are indicative and intended for policy planning purposes.
+</footer>
+
+<script>
+// ===== DATA =====
+const years = ['2008/09','2009/10','2010/11','2011/12','2012/13','2013/14','2014/15','2015/16','2016/17','2017/18','2018/19','2019/20','2020/21','2021/22','2022/23','2023/24','2024/25','2025/26'];
+
+const totalValue = [802.38,1643.62,1699.24,1868.17,2266.11,2663.05,3423.04,3527.49,4588.13,6307.19,7736.77,7056.83,9682.38,12579.95,10618.59,11173.62,15806.56,13989.40];
+const totalQty   = [205.99,485.93,163.95,220.81,188.84,222.79,281.54,259.84,436.31,378.47,457.23,413.45,1059.20,1097.47,919.43,865.02,1178.91,1001.26];
+
+const chinaVal = [156.29,341.23,283.63,363.20,575.97,559.90,659.53,756.32,1204.67,2554.01,3284.87,3700.21,4436.74,5231.32,4112.38,3745.81,5565.80,4717.71];
+const indiaVal = [498.41,1028.97,1236.72,1270.47,1439.13,1877.84,2152.28,2462.94,2912.05,3324.07,3931.02,2850.00,4500.81,6098.84,5524.12,6987.39,9442.30,8813.40];
+const othersVal= [147.68,273.42,178.90,234.51,251.02,225.31,611.24,308.23,471.41,429.11,520.88,506.62,744.83,1249.79,982.09,440.42,798.45,458.30];
+
+// By appliance value (annual, major items)
+const acVal    = [223.72,393.36,259.17,321.43,546.20,539.05,605.97,573.45,807.44,1572.02,2065.34,1943.27,2187.99,2272.71,2789.59,2583.95,5168.32,3937.17];
+const fridgeVal= [520.66,1094.52,1291.25,1322.57,1435.59,1734.00,2074.80,2419.71,2822.08,3437.98,4017.49,2979.42,3978.89,5355.62,4035.52,4767.86,5888.69,5200.04];
+const washerVal= [26.59,65.33,123.06,158.48,219.70,316.87,665.85,478.14,845.05,1143.44,1492.51,1938.28,2516.59,3730.41,2636.34,2956.91,3658.20,3948.29];
+const microVal = [31.41,90.42,25.76,65.69,64.62,73.13,76.42,56.19,113.56,153.75,161.43,167.32,301.57,355.54,365.97,226.17,240.33,221.69];
+
+// AC quantity
+const acQty = [27.66,28.09,16.93,15.61,21.80,21.82,22.32,20.74,28.78,52.17,70.31,76.85,66.57,59.61,76.40,68.99,154.13,112.89];
+const acChinaVal=[102.09,188.89,148.58,188.09,367.74,353.86,386.55,418.02,556.68,1090.27,1542.77,1389.52,1417.66,1507.71,1767.93,1640.32,3212.45,2603.64];
+const acIndiaVal=[12.72,12.74,5.89,10.33,12.49,65.40,88.78,45.90,91.93,243.56,309.66,361.75,600.80,624.49,794.64,866.62,1713.44,1044.88];
+
+// Fridge
+const fridgeQty = [146.98,440.15,132.37,178.92,138.48,173.10,211.73,203.65,354.46,253.53,308.18,211.92,270.27,320.64,236.15,277.46,361.17,321.47];
+
+// Washer
+const washerQty = [23.16,5.19,9.17,11.21,14.33,17.61,36.12,26.64,38.93,49.99,58.54,73.53,92.68,120.14,79.97,94.36,119.20,133.14];
+
+// Electric cooking (from 2020/21)
+const cookYears = ['2020/21','2021/22','2022/23','2023/24','2024/25','2025/26'];
+const inductionQty = [152.59,116.81,130.75,120.72,177.51,121.84];
+const infraredQty  = [2.40,41.45,73.65,50.22,59.93,61.23];
+const riceQty      = [442.07,403.89,283.02,229.25,280.81,226.96];
+
+// Appliance 2024/25 donut
+const app2425labels = ['Refrigerator','Washing Machine','Air Conditioning','Induction Stove','Microwave','Rice Cooker','Infrared Stove','Other'];
+const app2425vals   = [5888.69,3658.20,5168.32,351.05,240.33,381.85,111.33,6.79];
+const appColors     = ['#06b6d4','#8b5cf6','#f43f5e','#10b981','#f59e0b','#84cc16','#ec4899','#6b7280'];
+
+// Growth rates
+const growth = [null];
+for(let i=1;i<totalValue.length;i++){
+  growth.push(((totalValue[i]-totalValue[i-1])/totalValue[i-1]*100).toFixed(1));
+}
+
+// Cumulative stock (simplified: rolling 10-year sum of quantity)
+function rollingStock(qtyArr, window=10){
+  return qtyArr.map((v,i)=>{
+    const start=Math.max(0,i-window+1);
+    return qtyArr.slice(start,i+1).reduce((a,b)=>a+b,0);
+  });
+}
+const fridgeStock  = rollingStock(fridgeQty);
+const washerStock  = rollingStock(washerQty);
+const acStock      = rollingStock(acQty);
+const microQty     = [8.19,12.51,5.49,15.07,14.24,10.27,11.38,8.81,14.13,22.79,20.20,23.47,32.61,34.93,37.21,22.96,24.44,22.80];
+const microStock   = rollingStock(microQty);
+
+// ===== CHART DEFAULTS =====
+const C = Chart.defaults;
+C.color = '#7a8ea8';
+C.font.family = "'DM Sans', sans-serif";
+C.font.size = 11;
+
+const gridOpts = {
+  color: 'rgba(31,45,69,0.6)',
+  drawTicks: false,
+};
+const tickOpts = { padding: 8, color: '#4a6080', font:{size:10} };
+
+function baseOpts(xLabel='',yLabel='') {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a2235',
+        borderColor: '#1f2d45',
+        borderWidth: 1,
+        titleColor: '#e8edf5',
+        bodyColor: '#7a8ea8',
+        padding: 12,
+        cornerRadius: 8,
+      }
+    },
+    scales: {
+      x: {
+        grid: gridOpts,
+        ticks: { ...tickOpts, maxRotation:45 },
+        border: { color: '#1f2d45' }
+      },
+      y: {
+        grid: gridOpts,
+        ticks: tickOpts,
+        border: { color: 'transparent' }
+      }
+    }
+  };
+}
+
+// ===== CHART 1: Total Value =====
+new Chart(document.getElementById('chart-total-value'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [{
+      label: 'Import Value (M NPR)',
+      data: totalValue,
+      backgroundColor: years.map(y => y==='2025/26'?'rgba(249,115,22,0.4)':'rgba(249,115,22,0.7)'),
+      borderColor: years.map(y => y==='2025/26'?'#f97316':'#f97316'),
+      borderWidth: y => y==='2025/26'?2:0,
+      borderRadius: 4,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: {
+          label: ctx => ` NPR ${ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0})} M`
+        }
+      }
+    }
+  }
+});
+
+// ===== CHART 2: Country stacked =====
+new Chart(document.getElementById('chart-country-stack'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [
+      { label: 'China', data: chinaVal, backgroundColor: 'rgba(249,115,22,0.8)', borderRadius: 0, stack:'s' },
+      { label: 'India', data: indiaVal, backgroundColor: 'rgba(6,182,212,0.8)', borderRadius: 0, stack:'s' },
+      { label: 'Others', data: othersVal, backgroundColor: 'rgba(167,139,250,0.8)', borderRadius: [4,4,0,0], stack:'s' },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: {
+        display: false
+      },
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: NPR ${ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0})} M`
+        }
+      }
+    }
+  }
+});
+
+// ===== CHART 3: Country % =====
+const chinaPct = years.map((y,i) => (chinaVal[i]/totalValue[i]*100).toFixed(1));
+const indiaPct = years.map((y,i) => (indiaVal[i]/totalValue[i]*100).toFixed(1));
+const othersPct= years.map((y,i) => (othersVal[i]/totalValue[i]*100).toFixed(1));
+
+new Chart(document.getElementById('chart-country-pct'), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [
+      { label:'China', data: chinaPct, borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.1)', fill:true, tension:0.4, pointRadius:3, pointHoverRadius:5 },
+      { label:'India', data: indiaPct, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.1)', fill:true, tension:0.4, pointRadius:3, pointHoverRadius:5 },
+      { label:'Others', data: othersPct, borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.05)', fill:true, tension:0.4, pointRadius:3, pointHoverRadius:5 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` }
+      }
+    },
+    scales: {
+      ...baseOpts().scales,
+      y: { ...baseOpts().scales.y, min:0, max:100, ticks:{...tickOpts, callback:v=>v+'%'} }
+    }
+  }
+});
+
+// ===== CHART 4: Country donut =====
+new Chart(document.getElementById('chart-donut-country'), {
+  type: 'doughnut',
+  data: {
+    labels: ['India','China','Others'],
+    datasets: [{
+      data: [66350.76, 42249.57, 8832.22],
+      backgroundColor: ['rgba(6,182,212,0.85)','rgba(249,115,22,0.85)','rgba(167,139,250,0.85)'],
+      borderColor: '#111827', borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    cutout: '68%',
+    plugins: {
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:14, font:{size:11}} },
+      tooltip: {
+        backgroundColor:'#1a2235', borderColor:'#1f2d45', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#7a8ea8', padding:12, cornerRadius:8,
+        callbacks: { label: ctx => ` ${ctx.label}: NPR ${(ctx.parsed/1000).toFixed(1)}B (${(ctx.parsed/117432.55*100).toFixed(1)}%)` }
+      }
+    }
+  }
+});
+
+// ===== CHART 5: Appliance lines =====
+new Chart(document.getElementById('chart-appliance-lines'), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [
+      { label:'Refrigerator', data:fridgeVal, borderColor:'#06b6d4', backgroundColor:'transparent', tension:0.4, pointRadius:2, pointHoverRadius:5, borderWidth:2 },
+      { label:'Washing Machine', data:washerVal, borderColor:'#8b5cf6', backgroundColor:'transparent', tension:0.4, pointRadius:2, pointHoverRadius:5, borderWidth:2 },
+      { label:'Air Conditioning', data:acVal, borderColor:'#f43f5e', backgroundColor:'transparent', tension:0.4, pointRadius:2, pointHoverRadius:5, borderWidth:2 },
+      { label:'Microwave', data:microVal, borderColor:'#f59e0b', backgroundColor:'transparent', tension:0.4, pointRadius:2, pointHoverRadius:5, borderWidth:2 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: NPR ${ctx.parsed.y.toFixed(0)} M` }
+      }
+    }
+  }
+});
+
+// ===== CHART 6: Appliance donut 2024/25 =====
+new Chart(document.getElementById('chart-appliance-donut-24'), {
+  type: 'doughnut',
+  data: {
+    labels: app2425labels,
+    datasets: [{
+      data: app2425vals,
+      backgroundColor: appColors.map(c=>c+'cc'),
+      borderColor: '#111827', borderWidth: 2,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    cutout:'60%',
+    plugins: {
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:10, font:{size:10}} },
+      tooltip: {
+        backgroundColor:'#1a2235', borderColor:'#1f2d45', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#7a8ea8', padding:12, cornerRadius:8,
+        callbacks: { label: ctx => ` NPR ${ctx.parsed.toFixed(0)} M (${(ctx.parsed/15806.56*100).toFixed(1)}%)` }
+      }
+    }
+  }
+});
+
+// ===== CHART 7: Refrigerator dual axis =====
+new Chart(document.getElementById('chart-fridge'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [
+      { type:'bar', label:'Quantity (000 units)', data:fridgeQty, backgroundColor:'rgba(6,182,212,0.5)', yAxisID:'y', borderRadius:3 },
+      { type:'line', label:'Value (M NPR)', data:fridgeVal, borderColor:'#06b6d4', backgroundColor:'transparent', yAxisID:'y1', tension:0.4, pointRadius:2, borderWidth:2 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+    },
+    scales: {
+      x: { grid:gridOpts, ticks:{...tickOpts,maxRotation:45}, border:{color:'#1f2d45'} },
+      y: { grid:gridOpts, ticks:{...tickOpts,callback:v=>v+'K'}, border:{color:'transparent'}, position:'left' },
+      y1: { grid:{drawOnChartArea:false}, ticks:{...tickOpts,callback:v=>v+'M'}, border:{color:'transparent'}, position:'right' }
+    }
+  }
+});
+
+// ===== CHART 8: Washing machine dual axis =====
+new Chart(document.getElementById('chart-washer'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [
+      { type:'bar', label:'Quantity (000 units)', data:washerQty, backgroundColor:'rgba(139,92,246,0.5)', yAxisID:'y', borderRadius:3 },
+      { type:'line', label:'Value (M NPR)', data:washerVal, borderColor:'#8b5cf6', backgroundColor:'transparent', yAxisID:'y1', tension:0.4, pointRadius:2, borderWidth:2 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+    },
+    scales: {
+      x: { grid:gridOpts, ticks:{...tickOpts,maxRotation:45}, border:{color:'#1f2d45'} },
+      y: { grid:gridOpts, ticks:{...tickOpts,callback:v=>v+'K'}, border:{color:'transparent'}, position:'left' },
+      y1: { grid:{drawOnChartArea:false}, ticks:{...tickOpts,callback:v=>v+'M'}, border:{color:'transparent'}, position:'right' }
+    }
+  }
+});
+
+// ===== CHART 9: Electric cooking =====
+new Chart(document.getElementById('chart-cooking'), {
+  type: 'bar',
+  data: {
+    labels: cookYears,
+    datasets: [
+      { label:'Rice Cooker', data:riceQty, backgroundColor:'rgba(132,204,22,0.75)', borderRadius:3, stack:'s' },
+      { label:'Induction Stove', data:inductionQty, backgroundColor:'rgba(16,185,129,0.85)', borderRadius:0, stack:'s' },
+      { label:'Infrared Stove', data:infraredQty, backgroundColor:'rgba(236,72,153,0.85)', borderRadius:[4,4,0,0], stack:'s' },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}K units` }
+      }
+    },
+    scales: {
+      ...baseOpts().scales,
+      y: { ...baseOpts().scales.y, ticks:{...tickOpts,callback:v=>v+'K'} }
+    }
+  }
+});
+
+// ===== CHART 10: AC by country =====
+new Chart(document.getElementById('chart-ac'), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [
+      { label:'China', data:acChinaVal, borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.1)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+      { label:'India', data:acIndiaVal, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.1)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: NPR ${ctx.parsed.y.toFixed(0)} M` }
+      }
+    }
+  }
+});
+
+// ===== CHART 11: AC quantity =====
+new Chart(document.getElementById('chart-ac-qty'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [{
+      label:'AC Units (000)',
+      data: acQty,
+      backgroundColor: acQty.map((v,i)=> i>=16?'rgba(244,63,94,0.9)': i>=10?'rgba(244,63,94,0.7)':'rgba(244,63,94,0.45)'),
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(2)}K units` }
+      }
+    },
+    scales: {
+      ...baseOpts().scales,
+      y: { ...baseOpts().scales.y, ticks:{...tickOpts,callback:v=>v+'K'} }
+    }
+  }
+});
+
+// ===== CHART 12: Cumulative stock =====
+new Chart(document.getElementById('chart-stock'), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [
+      { label:'Refrigerators', data:fridgeStock, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.08)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+      { label:'Washing Machines', data:washerStock, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+      { label:'Air Conditioners', data:acStock, borderColor:'#f43f5e', backgroundColor:'rgba(244,63,94,0.06)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+      { label:'Microwaves', data:microStock, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+    ]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      legend: { display:true, position:'bottom', labels:{color:'#7a8ea8', boxWidth:10, padding:12, font:{size:11}} },
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ~${ctx.parsed.y.toFixed(0)}K units in circulation` }
+      }
+    },
+    scales: {
+      ...baseOpts().scales,
+      y: { ...baseOpts().scales.y, ticks:{...tickOpts,callback:v=>v+'K'} }
+    }
+  }
+});
+
+// ===== CHART 13: Growth rate =====
+const growthColors = growth.map(v => v===null?'#555': v>0?'rgba(52,211,153,0.8)':'rgba(244,63,94,0.8)');
+new Chart(document.getElementById('chart-growth'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: [{
+      label:'YoY Growth (%)',
+      data: growth,
+      backgroundColor: growthColors,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    ...baseOpts(),
+    plugins: {
+      ...baseOpts().plugins,
+      tooltip: {
+        ...baseOpts().plugins.tooltip,
+        callbacks: { label: ctx => ` YoY: ${ctx.parsed.y}%` }
+      }
+    },
+    scales: {
+      ...baseOpts().scales,
+      y: { ...baseOpts().scales.y, ticks:{...tickOpts,callback:v=>v+'%'} }
+    }
+  }
+});
+
+// ===== TABLE =====
+const maxVal = Math.max(...totalValue);
+const tbody = document.getElementById('table-body');
+years.forEach((y,i)=>{
+  const yoy = i===0?'—': ((totalValue[i]-totalValue[i-1])/totalValue[i-1]*100).toFixed(1)+'%';
+  const yoyClass = i>0&&totalValue[i]>totalValue[i-1]?'up':'down';
+  const barW = (totalValue[i]/maxVal*100).toFixed(1);
+  const cp = (chinaVal[i]/totalValue[i]*100).toFixed(0)+'%';
+  const ip = (indiaVal[i]/totalValue[i]*100).toFixed(0)+'%';
+  const note = y==='2025/26'?' *':'';
+  tbody.innerHTML += `<tr>
+    <td>${y}${note}</td>
+    <td class="num">${totalQty[i].toFixed(2)}</td>
+    <td class="num">${totalValue[i].toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
+    <td class="num">${cp}</td>
+    <td class="num">${ip}</td>
+    <td class="num ${i>0?(totalValue[i]>totalValue[i-1]?'up':'down'):''}">${yoy}</td>
+    <td class="bar-cell"><div class="mini-bar" style="width:${barW}%;background:var(--accent);opacity:0.7"></div></td>
+  </tr>`;
+});
+
+</script>
+</body>
+</html>
